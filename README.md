@@ -1,6 +1,8 @@
-# SC Scraper
+# SC Scraper (SoundCloud Downloader & Metadata Extractor)
 
-Outil d'extraction de métadonnées SoundCloud et de téléchargement audio, déployable sur n'importe quel serveur PHP disposant de FFmpeg.
+**Mots-clés / Keywords :** SoundCloud downloader, SoundCloud scraper, SoundCloud to MP3, PHP SoundCloud downloader, download SoundCloud audio, extracteur SoundCloud, convertisseur SoundCloud, téléchargeur SoundCloud, SoundCloud metadata API, HLS downloader, SoundCloud grabber, mp3 downloader, open source SoundCloud scraper.
+
+Outil puissant d'extraction de métadonnées SoundCloud et de téléchargement audio, déployable sur n'importe quel serveur PHP disposant de FFmpeg. Idéal pour récupérer les pistes, audios, musiques et statistiques d'artistes facilement et rapidement.
 
 ---
 

@@ -176,6 +176,85 @@
     .bouton-retour { justify-self: start; margin-bottom: -1.5rem; padding: .45rem 1rem .45rem .7rem; background: #fff; border: 1.5px solid var(--trait-fort); color: var(--encre); font-size: .9rem; }
     .bouton-retour:hover { border-color: var(--encre); }
 
+    /* ── Lecteur à forme d'onde ── */
+    .lecteur {
+      --onde-reste: #e1e1e9; --onde-memoire: #cdcdd8; --rouge-clair: #f4606c;
+      grid-column: 1 / -1; position: relative;
+      display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: "lecture temps outils" "bas bas bas";
+      align-items: center; gap: 2rem 1.35rem;
+      padding: 1.35rem 1.6rem 1.5rem; background: #fff; border: 1px solid var(--trait); border-radius: 24px;
+      box-shadow: 0 1px 0 rgba(28, 28, 33, .03), 0 28px 44px -30px rgba(225, 29, 46, .34), 0 14px 26px -18px rgba(28, 28, 33, .2);
+    }
+    .lecteur-lecture { grid-area: lecture; }
+    .lecteur-temps  { grid-area: temps; }
+    .lecteur-outils { grid-area: outils; }
+    .lecteur-bas    { grid-area: bas; display: grid; gap: .7rem; }
+
+    .lecteur-bouton { position: relative; isolation: isolate; display: grid; place-items: center; width: 64px; height: 64px; padding: 0; border: 0; border-radius: 50%; background: var(--rouge); color: #fff; cursor: pointer; box-shadow: 0 14px 26px -10px rgba(225, 29, 46, .7), inset 0 1px 0 rgba(255, 255, 255, .22); transition: background-color .18s, transform .12s var(--courbe), box-shadow .2s; }
+    .lecteur-bouton:hover { background: var(--rouge-fonce); transform: scale(1.05); }
+    .lecteur-bouton:active { transform: scale(.95); }
+    .lecteur-bouton:focus-visible { outline: 3px solid rgba(225, 29, 46, .4); outline-offset: 4px; }
+    .lecteur-bouton:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .lecteur-bouton svg { grid-area: 1 / 1; }
+    .lecteur-bouton .icone-lecture { margin-left: 2px; }
+    .lecteur-bouton .icone-pause, .lecteur-bouton .spinner { display: none; }
+    .lecteur.en-lecture .lecteur-bouton .icone-lecture { display: none; }
+    .lecteur.en-lecture .lecteur-bouton .icone-pause { display: block; }
+    .lecteur.attente .lecteur-bouton .icone-lecture, .lecteur.attente .lecteur-bouton .icone-pause { display: none; }
+    .lecteur.attente .lecteur-bouton .spinner { display: block; grid-area: 1 / 1; width: 26px; height: 26px; border-width: 3px; }
+    .lecteur-bouton-halo { position: absolute; inset: 0; z-index: -1; border-radius: 50%; background: var(--rouge); opacity: 0; pointer-events: none; }
+    .lecteur.en-lecture .lecteur-bouton-halo { animation: halo 2.1s var(--courbe) infinite; }
+    @keyframes halo { 0% { transform: scale(1); opacity: .38; } 100% { transform: scale(1.42); opacity: 0; } }
+
+    .lecteur-temps { display: flex; align-items: baseline; gap: .55rem; min-width: 0; }
+    .lecteur-temps-courant { font: 800 clamp(1.75rem, 3.4vw, 2.25rem)/1 var(--police-titre); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+    .lecteur-temps-total { color: var(--encre-douce); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .egaliseur { align-self: center; display: inline-flex; align-items: flex-end; gap: 2px; height: 18px; margin-left: .45rem; opacity: 0; transition: opacity .25s; }
+    .lecteur.en-lecture .egaliseur { opacity: 1; }
+    .egaliseur i { width: 3px; height: 100%; border-radius: 2px; background: var(--rouge); transform: scaleY(.28); transform-origin: bottom; }
+    .lecteur.en-lecture .egaliseur i { animation: egaliseur .9s ease-in-out infinite; }
+    .lecteur.en-lecture .egaliseur i:nth-child(2) { animation-duration: .65s; animation-delay: -.25s; }
+    .lecteur.en-lecture .egaliseur i:nth-child(3) { animation-duration: 1.05s; animation-delay: -.5s; }
+    .lecteur.en-lecture .egaliseur i:nth-child(4) { animation-duration: .75s; animation-delay: -.1s; }
+    @keyframes egaliseur { 0%, 100% { transform: scaleY(.28); } 50% { transform: scaleY(1); } }
+
+    .lecteur-outils { display: flex; align-items: center; gap: .5rem; }
+    .lecteur-outil { display: inline-grid; place-items: center; min-width: 40px; height: 40px; padding: 0; background: #fff; border: 1.5px solid var(--trait-fort); border-radius: 999px; color: var(--encre); cursor: pointer; transition: border-color .15s, color .15s, background-color .15s, transform .1s; }
+    .lecteur-outil:hover { border-color: var(--rouge); color: var(--rouge); }
+    .lecteur-outil:active { transform: scale(.94); }
+    .lecteur-outil:focus-visible { outline: 3px solid rgba(225, 29, 46, .4); outline-offset: 3px; }
+    .lecteur-vitesse { min-width: 3.5rem; padding: 0 .8rem; font-size: .9rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .lecteur-volume { display: flex; align-items: center; gap: .35rem; margin-left: .35rem; }
+    .lecteur-volume .vol-haut, .lecteur-volume .vol-bas, .lecteur-volume .vol-muet { display: none; }
+    .lecteur-volume[data-niveau="haut"] .vol-haut, .lecteur-volume[data-niveau="bas"] .vol-bas, .lecteur-volume[data-niveau="muet"] .vol-muet { display: block; }
+    .lecteur-curseur { --p: 100%; -webkit-appearance: none; appearance: none; width: 92px; height: 22px; margin: 0; background: transparent; cursor: pointer; }
+    .lecteur-curseur::-webkit-slider-runnable-track { height: 4px; border-radius: 999px; background: linear-gradient(to right, var(--rouge) var(--p), var(--trait-fort) var(--p)); }
+    .lecteur-curseur::-webkit-slider-thumb { -webkit-appearance: none; box-sizing: border-box; width: 14px; height: 14px; margin-top: -5px; border: 2px solid var(--rouge); border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(28, 28, 33, .25); transition: transform .15s; }
+    .lecteur-curseur:hover::-webkit-slider-thumb { transform: scale(1.18); }
+    .lecteur-curseur::-moz-range-track { height: 4px; border-radius: 999px; background: var(--trait-fort); }
+    .lecteur-curseur::-moz-range-progress { height: 4px; border-radius: 999px; background: var(--rouge); }
+    .lecteur-curseur::-moz-range-thumb { box-sizing: border-box; width: 14px; height: 14px; border: 2px solid var(--rouge); border-radius: 50%; background: #fff; }
+    .lecteur-curseur:focus-visible { outline: 3px solid rgba(225, 29, 46, .4); outline-offset: 3px; border-radius: 999px; }
+
+    .lecteur-onde { position: relative; height: 116px; border-radius: 14px; cursor: pointer; touch-action: pan-y; user-select: none; -webkit-tap-highlight-color: transparent; }
+    .lecteur-onde canvas { display: block; width: 100%; height: 100%; }
+    .lecteur-onde:focus-visible { outline: 3px solid rgba(225, 29, 46, .4); outline-offset: 5px; }
+    .lecteur-onde.chargement::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .8) 50%, transparent 70%) 0 0 / 250% 100%; animation: balayage 1.5s linear infinite; pointer-events: none; }
+    @keyframes balayage { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+    .lecteur-infobulle { position: absolute; top: -4px; left: 0; z-index: 2; transform: translate(-50%, -100%); padding: .2rem .65rem; background: var(--encre); border-radius: 9px; color: #fff; font: 700 .82rem/1.4 var(--police-titre); font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; }
+    .lecteur-infobulle::after { content: ''; position: absolute; left: 50%; top: 100%; margin-left: -5px; border: 5px solid transparent; border-top-color: var(--encre); }
+    .lecteur-message { margin: 0; color: var(--encre-douce); font-size: .88rem; }
+    .lecteur-message.erreur-lecture { color: var(--rouge-fonce); font-weight: 600; }
+
+    @media (max-width: 640px) {
+      .lecteur { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "lecture temps" "bas bas" "outils outils"; gap: 1.8rem 1rem; padding: 1.1rem 1.1rem 1.2rem; border-radius: 20px; }
+      .lecteur-bouton { width: 56px; height: 56px; }
+      .lecteur-onde { height: 92px; }
+      .lecteur-outils { justify-content: space-between; }
+      .lecteur-volume { display: none; }
+    }
+
     @media (max-width: 860px) {
       .liste-pistes { grid-template-columns: 1fr; }
       .piste { grid-template-columns: 1fr; }
@@ -217,7 +296,7 @@
       <div class="intro">
         <div class="intro-contenu">
           <h1 class="titre-principal">Cherchez un titre SoundCloud, obtenez toutes ses infos.</h1>
-          <p class="sous-titre">Tapez un titre ou un artiste, ou collez une adresse SoundCloud&nbsp;: statistiques, métadonnées éditeur et téléchargement audio.</p>
+          <p class="sous-titre">Tapez un titre ou un artiste, ou collez une adresse SoundCloud&nbsp;: écoute avec forme d’onde, statistiques, métadonnées éditeur et téléchargement audio.</p>
         </div>
       </div>
 
@@ -356,6 +435,7 @@
     bouton.textContent = enCours ? (mode === 'recherche' ? 'Recherche…' : 'Analyse…') : libelleLancement();
   }
   function masquerResultats() {
+    detruireLecteur();
     parId('resultats').hidden = true;
     parId('resultats-recherche').hidden = true;
   }
@@ -611,6 +691,821 @@
     });
   }
 
+  // ═════════════════════════════════════════════════════════════════════════
+  // Lecteur à forme d'onde
+  // ═════════════════════════════════════════════════════════════════════════
+  const VITESSES_LECTURE = [1, 1.25, 1.5, 2, 0.75];
+  const SAUT_SECONDES    = 10;
+  const PAS_CLAVIER      = 5;
+  const CLE_VOLUME       = 'sc_scraper_volume';
+  const RVB_ROUGE        = '225, 29, 46';
+  const borner = (valeur, min, max) => Math.min(max, Math.max(min, valeur));
+
+  function formaterTemps(secondes) {
+    if (!isFinite(secondes) || secondes < 0) secondes = 0;
+    const total   = Math.floor(secondes);
+    const heures  = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    const reste   = String(total % 60).padStart(2, '0');
+    return heures > 0 ? heures + ':' + String(minutes).padStart(2, '0') + ':' + reste : minutes + ':' + reste;
+  }
+
+  const CHEMIN_REPLAY = 'M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z';
+  const TEXTE_SAUT    = '<text x="12" y="16" text-anchor="middle" font-size="7.5" font-weight="700" font-family="system-ui, sans-serif">10</text>';
+  const CORPS_HAUT_PARLEUR = '<path d="M4 9.5h3.2L12 5.5v13l-4.8-4H4z" fill="currentColor"/>';
+  const ICONES_LECTEUR = {
+    lecture: '<svg class="icone-lecture" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>',
+    pause:   '<svg class="icone-pause" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6.2" y="4.8" width="4.2" height="14.4" rx="1.6"/><rect x="13.6" y="4.8" width="4.2" height="14.4" rx="1.6"/></svg>',
+    reculer: '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="' + CHEMIN_REPLAY + '"/>' + TEXTE_SAUT + '</svg>',
+    avancer: '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><g transform="translate(24 0) scale(-1 1)"><path d="' + CHEMIN_REPLAY + '"/></g>' + TEXTE_SAUT + '</svg>',
+    volHaut: '<svg class="vol-haut" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">' + CORPS_HAUT_PARLEUR + '<path d="M15.5 9.2a4.2 4.2 0 0 1 0 5.6M18.2 6.6a8 8 0 0 1 0 10.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    volBas:  '<svg class="vol-bas" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">' + CORPS_HAUT_PARLEUR + '<path d="M15.5 9.2a4.2 4.2 0 0 1 0 5.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    volMuet: '<svg class="vol-muet" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">' + CORPS_HAUT_PARLEUR + '<path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  };
+
+  function htmlLecteur() {
+    return `<section class="lecteur" aria-label="Lecteur audio">
+      <div class="lecteur-lecture">
+        <button type="button" class="lecteur-bouton" data-role="lecture" aria-label="Lire">
+          <span class="lecteur-bouton-halo" aria-hidden="true"></span>
+          ${ICONES_LECTEUR.lecture}${ICONES_LECTEUR.pause}
+          <span class="spinner spinner-blanc" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="lecteur-temps">
+        <span class="lecteur-temps-courant" data-role="temps-courant">0:00</span>
+        <span class="lecteur-temps-total">/ <span data-role="temps-total">0:00</span></span>
+        <span class="egaliseur" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </div>
+      <div class="lecteur-outils">
+        <button type="button" class="lecteur-outil" data-role="reculer" aria-label="Reculer de ${SAUT_SECONDES} secondes">${ICONES_LECTEUR.reculer}</button>
+        <button type="button" class="lecteur-outil" data-role="avancer" aria-label="Avancer de ${SAUT_SECONDES} secondes">${ICONES_LECTEUR.avancer}</button>
+        <button type="button" class="lecteur-outil lecteur-vitesse" data-role="vitesse" aria-label="Vitesse de lecture : 1">1×</button>
+        <div class="lecteur-volume" data-role="zone-volume" data-niveau="haut">
+          <button type="button" class="lecteur-outil" data-role="muet" aria-label="Couper le son">${ICONES_LECTEUR.volHaut}${ICONES_LECTEUR.volBas}${ICONES_LECTEUR.volMuet}</button>
+          <input type="range" class="lecteur-curseur" data-role="volume" min="0" max="100" step="1" value="100" aria-label="Volume" />
+        </div>
+      </div>
+      <div class="lecteur-bas">
+        <div class="lecteur-onde chargement" data-role="onde" tabindex="0" role="slider" aria-label="Position de lecture" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00" aria-busy="true">
+          <canvas></canvas>
+          <div class="lecteur-infobulle" data-role="infobulle" hidden>0:00</div>
+        </div>
+        <p class="lecteur-message" data-role="message" role="status" hidden></p>
+      </div>
+    </section>`;
+  }
+
+  /** Flux lisibles directement : MP3 progressif d'abord, puis HLS non chiffré. */
+  function classerFlux(flux) {
+    return (flux || [])
+      .map((s, index) => ({ index, url: s.url, protocole: (s.protocol || '').toLowerCase(), mime: (s.mime || '').toLowerCase() }))
+      .filter(c => c.url && !c.protocole.includes('encrypted'))
+      .map(c => ({
+        ...c,
+        rang: c.protocole === 'progressive' ? 0
+            : c.protocole === 'hls' ? (c.mime.includes('mpeg') ? 1 : c.mime.includes('mp4') ? 2 : 9)
+            : 9,
+      }))
+      .filter(c => c.rang < 9)
+      .sort((a, b) => a.rang - b.rang);
+  }
+
+  /** Onde de substitution, stable pour un même titre, affichée si SoundCloud ne fournit pas la vraie. */
+  function genererOndeFictive(graine, nombre = 400) {
+    const aleatoire = generateurAleatoire(graine);
+    const phases = [aleatoire() * 6.28, aleatoire() * 6.28];
+    const echantillons = [];
+    for (let i = 0; i < nombre; i++) {
+      const t = i / nombre;
+      const enveloppe = 0.45 + 0.35 * Math.abs(Math.sin(t * 5.1 + phases[0])) + 0.2 * Math.abs(Math.sin(t * 13 + phases[1]));
+      const attaque = Math.min(1, t * 30);
+      const fin = 0.6 + 0.4 * Math.min(1, (1 - t) * 12);
+      echantillons.push(borner(enveloppe * (0.55 + 0.45 * aleatoire()) * attaque * fin, 0.05, 1));
+    }
+    return echantillons;
+  }
+
+  function rectArrondi(chemin, x, y, largeur, hauteur, rayon) {
+    if (chemin.roundRect) chemin.roundRect(x, y, largeur, hauteur, rayon);
+    else chemin.rect(x, y, largeur, hauteur);
+  }
+
+  let _promesseHls = null;
+  function chargerBibliothequeHls() {
+    if (window.Hls) return Promise.resolve(window.Hls);
+    if (!_promesseHls) {
+      _promesseHls = new Promise((resoudre, rejeter) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js';
+        script.onload  = () => resoudre(window.Hls);
+        script.onerror = () => { _promesseHls = null; rejeter(new Error('hls.js indisponible')); };
+        document.head.appendChild(script);
+      });
+    }
+    return _promesseHls;
+  }
+
+  class LecteurOnde {
+    constructor(racine, { piste, artiste, idClient, authPiste }) {
+      this.racine     = racine;
+      this.piste      = piste;
+      this.artiste    = artiste;
+      this.idClient   = idClient;
+      this.authPiste  = authPiste || '';
+      this.dureePiste = (Number(piste.duration_ms) || 0) / 1000;
+      this.candidats  = classerFlux(piste.audio_streams);
+      this.controleur = new AbortController();
+      this.mouvementReduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const el = nom => racine.querySelector('[data-role="' + nom + '"]');
+      this.boutonLecture  = el('lecture');
+      this.tempsCourant   = el('temps-courant');
+      this.tempsTotal     = el('temps-total');
+      this.boutonReculer  = el('reculer');
+      this.boutonAvancer  = el('avancer');
+      this.boutonVitesse  = el('vitesse');
+      this.boutonMuet     = el('muet');
+      this.zoneVolume     = el('zone-volume');
+      this.curseurVolume  = el('volume');
+      this.zoneOnde       = el('onde');
+      this.infobulle      = el('infobulle');
+      this.zoneMessage    = el('message');
+      this.canvas         = this.zoneOnde.querySelector('canvas');
+      this.ctx            = this.canvas.getContext('2d');
+
+      // Audio
+      this.audio = new Audio();
+      this.audio.preload = 'metadata';
+      try {
+        const volumeEnregistre = parseFloat(localStorage.getItem(CLE_VOLUME));
+        if (isFinite(volumeEnregistre)) this.audio.volume = borner(volumeEnregistre, 0, 1);
+      } catch (_) { /* stockage indisponible : volume par défaut */ }
+
+      // État de lecture
+      this.sourcePrete       = false;
+      this.promesseSource    = null;
+      this.hls               = null;
+      this.lectureDemandee   = false;
+      this.enAttente         = false;
+      this.termine           = false;
+      this.positionEnAttente = null;
+      this.extraitSignale    = false;
+      this.detruit           = false;
+
+      // État de l'onde
+      this.glisse         = false;
+      this.positionGlisse = 0;
+      this.survol         = false;
+      this.xSurvol        = 0;
+      this.ratioMemoire   = 0;
+      this.secondeAffichee = -1;
+      this.imageDemandee  = 0;
+      this.largeur = 0; this.hauteur = 0; this.dpr = 1;
+      this.nbBarres = 0; this.pas = 5; this.largeurBarre = 3;
+      this.barres    = new Float32Array(0);
+      this.affichage = new Float32Array(0);
+      this.bosse     = new Float32Array(0);
+      this.echantillons = genererOndeFictive(Number(piste.id) % 100000 || 2718);
+      this.debutIntro   = performance.now();
+
+      const style = getComputedStyle(racine);
+      const lire = (nom, secours) => style.getPropertyValue(nom).trim() || secours;
+      this.couleurs = {
+        reste:      lire('--onde-reste', '#e1e1e9'),
+        memoire:    lire('--onde-memoire', '#cdcdd8'),
+        rouge:      lire('--rouge', '#e11d2e'),
+        rougeClair: lire('--rouge-clair', '#f4606c'),
+      };
+
+      this.lierEvenements();
+      this.configurerSessionMedia();
+      this.observateur = new ResizeObserver(() => this.redimensionner());
+      this.observateur.observe(this.zoneOnde);
+
+      this.majTempsTotal();
+      this.majVolume();
+      this.majVitesse();
+      this.majEtat();
+      this.chargerFormeOnde();
+      this.preparerSource().catch(() => { /* le message d'erreur est déjà affiché */ });
+    }
+
+    get enLecture() { return !this.audio.paused && !this.audio.ended; }
+
+    /** Durée de référence : celle du flux si elle colle à celle du titre, sinon celle du titre (extrait). */
+    get duree() {
+      const flux = this.audio.duration, titre = this.dureePiste;
+      if (isFinite(flux) && flux > 0) {
+        if (!titre || Math.abs(flux - titre) / titre < 0.03 || flux > titre) return flux;
+        return titre;
+      }
+      return titre || 0;
+    }
+
+    positionCourante() {
+      return this.sourcePrete ? this.audio.currentTime : (this.positionEnAttente || 0);
+    }
+
+    ratioAffiche() {
+      if (this.glisse) return this.positionGlisse;
+      const duree = this.duree;
+      if (!duree) return 0;
+      if (this.termine) return 1;
+      return borner(this.positionCourante() / duree, 0, 1);
+    }
+
+    // ── Source audio ─────────────────────────────────────────────────────
+    async resoudreUrl(candidat) {
+      const donnees = [{ index: candidat.index, url: candidat.url }];
+      const reponse = await fetch(
+        './sc.php?action=check_streams'
+        + '&client_id='           + encodeURIComponent(this.idClient)
+        + '&track_authorization=' + encodeURIComponent(this.authPiste)
+        + '&streams='             + encodeURIComponent(JSON.stringify(donnees)),
+        { signal: this.controleur.signal }
+      );
+      const resultat = await reponse.json();
+      return (resultat.success && resultat.valid.length) ? resultat.valid[0].url : null;
+    }
+
+    async essayerSource(candidat) {
+      const url = await this.resoudreUrl(candidat);
+      if (!url) throw new Error('Flux indisponible');
+      if (this.detruit) throw new Error('Lecteur fermé');
+
+      const audio = this.audio;
+      if (this.hls) { this.hls.destroy(); this.hls = null; }
+
+      if (candidat.protocole === 'hls' && !audio.canPlayType('application/vnd.apple.mpegurl')) {
+        const Hls = await chargerBibliothequeHls();
+        if (!Hls || !Hls.isSupported()) throw new Error('HLS non pris en charge');
+        await new Promise((resoudre, rejeter) => {
+          let pret = false;
+          const hls = new Hls({ enableWorker: true });
+          this.hls = hls;
+          hls.on(Hls.Events.MANIFEST_PARSED, () => { pret = true; resoudre(); });
+          hls.on(Hls.Events.ERROR, (_, erreur) => {
+            if (!erreur.fatal) return;
+            if (pret) this.afficherMessage('Le flux audio a été interrompu. Relancez la lecture.');
+            else rejeter(new Error('Flux HLS illisible'));
+          });
+          hls.loadSource(url);
+          hls.attachMedia(audio);
+        });
+      } else {
+        await new Promise((resoudre, rejeter) => {
+          const delai = setTimeout(echec, 12000);
+          function nettoyer() {
+            clearTimeout(delai);
+            audio.removeEventListener('loadedmetadata', succes);
+            audio.removeEventListener('error', echec);
+          }
+          function succes() { nettoyer(); resoudre(); }
+          function echec()  { nettoyer(); rejeter(new Error('Flux illisible')); }
+          audio.addEventListener('loadedmetadata', succes);
+          audio.addEventListener('error', echec);
+          audio.src = url;
+          audio.load();
+        });
+      }
+    }
+
+    async chargerSource() {
+      let derniereErreur = null;
+      for (const candidat of this.candidats) {
+        try {
+          await this.essayerSource(candidat);
+          this.sourcePrete = true;
+          if (this.positionEnAttente !== null) {
+            this.audio.currentTime = this.positionEnAttente;
+            this.positionEnAttente = null;
+          }
+          this.majTempsTotal();
+          this.verifierExtrait();
+          this.majMemoire();
+          this.demanderImage();
+          return;
+        } catch (e) {
+          derniereErreur = e;
+          if (this.detruit) throw e;
+        }
+      }
+      throw derniereErreur || new Error('Aucun flux lisible');
+    }
+
+    preparerSource() {
+      if (this.sourcePrete) return Promise.resolve();
+      if (!this.promesseSource) {
+        this.promesseSource = this.chargerSource().catch(e => {
+          this.promesseSource = null;
+          if (!this.detruit) this.afficherMessage('Lecture impossible pour ce titre : le flux audio est indisponible.');
+          throw e;
+        });
+      }
+      return this.promesseSource;
+    }
+
+    verifierExtrait() {
+      const flux = this.audio.duration;
+      if (this.extraitSignale || !isFinite(flux) || flux <= 0 || !this.dureePiste) return;
+      if (flux < this.dureePiste * 0.97) {
+        this.extraitSignale = true;
+        this.afficherMessage('Seul un extrait de ' + formaterTemps(flux) + ' est diffusé pour ce titre.', false);
+      }
+    }
+
+    // ── Commandes ────────────────────────────────────────────────────────
+    basculerLecture() {
+      if (this.enLecture || this.lectureDemandee) this.mettrePause();
+      else this.lire();
+    }
+
+    async lire() {
+      if (this.detruit) return;
+      this.lectureDemandee = true;
+      if (this.messageEstErreur) this.afficherMessage('');
+      this.majEtat();
+      try {
+        await this.preparerSource();
+      } catch (e) {
+        this.lectureDemandee = false;
+        this.majEtat();
+        return;
+      }
+      if (!this.lectureDemandee || this.detruit) return;
+      try {
+        await this.audio.play();
+      } catch (e) {
+        this.lectureDemandee = false;
+        if (e && e.name !== 'AbortError') this.afficherMessage('Le navigateur a bloqué la lecture. Appuyez de nouveau sur lecture.');
+      }
+      this.majEtat();
+    }
+
+    mettrePause() {
+      this.lectureDemandee = false;
+      if (!this.audio.paused) this.audio.pause();
+      this.majEtat();
+    }
+
+    aller(secondes) {
+      const duree = this.duree;
+      const limite = (isFinite(this.audio.duration) && this.audio.duration > 0) ? this.audio.duration : duree;
+      const cible = borner(secondes, 0, Math.max(0, limite - 0.1));
+      this.termine = false;
+      if (this.sourcePrete) this.audio.currentTime = cible;
+      else this.positionEnAttente = cible;
+      this.majTemps();
+      this.demanderImage();
+    }
+
+    decaler(delta) { this.aller(this.positionCourante() + delta); }
+
+    changerVitesse() {
+      const indice = VITESSES_LECTURE.indexOf(this.audio.playbackRate);
+      this.audio.playbackRate = VITESSES_LECTURE[(indice + 1) % VITESSES_LECTURE.length];
+    }
+
+    changerVolume(valeur) {
+      this.audio.muted = false;
+      this.audio.volume = borner(valeur, 0, 1);
+      try { localStorage.setItem(CLE_VOLUME, String(this.audio.volume)); } catch (_) { /* facultatif */ }
+    }
+
+    basculerMuet() {
+      const audio = this.audio;
+      if (audio.muted || audio.volume === 0) {
+        audio.muted = false;
+        if (audio.volume === 0) audio.volume = 0.6;
+      } else {
+        audio.muted = true;
+      }
+    }
+
+    // ── Mises à jour de l'interface ──────────────────────────────────────
+    majEtat() {
+      const enLecture = this.enLecture;
+      const attente = (this.lectureDemandee && !enLecture) || (enLecture && this.enAttente);
+      this.racine.classList.toggle('en-lecture', enLecture);
+      this.racine.classList.toggle('attente', attente);
+      this.boutonLecture.setAttribute('aria-label', (enLecture || this.lectureDemandee) ? 'Mettre en pause' : 'Lire');
+    }
+
+    majTemps() {
+      const duree = this.duree;
+      const temps = this.glisse ? this.positionGlisse * duree : this.positionCourante();
+      const seconde = Math.floor(temps);
+      if (seconde === this.secondeAffichee) return;
+      this.secondeAffichee = seconde;
+      this.tempsCourant.textContent = formaterTemps(temps);
+      this.zoneOnde.setAttribute('aria-valuenow', seconde);
+      this.zoneOnde.setAttribute('aria-valuetext', formaterTemps(temps) + ' sur ' + formaterTemps(duree));
+    }
+
+    majTempsTotal() {
+      const duree = this.duree;
+      this.tempsTotal.textContent = formaterTemps(duree);
+      this.zoneOnde.setAttribute('aria-valuemax', Math.floor(duree));
+      this.secondeAffichee = -1;
+      this.majTemps();
+    }
+
+    majMemoire() {
+      const plages = this.audio.buffered, duree = this.duree;
+      if (!duree || !plages.length) return;
+      const t = this.audio.currentTime;
+      let fin = plages.end(plages.length - 1);
+      for (let i = 0; i < plages.length; i++) {
+        if (plages.start(i) <= t + 0.5 && plages.end(i) >= t) { fin = plages.end(i); break; }
+      }
+      this.ratioMemoire = borner(fin / duree, 0, 1);
+    }
+
+    majVolume() {
+      const audio = this.audio;
+      const pourcent = audio.muted ? 0 : Math.round(audio.volume * 100);
+      const niveau = (audio.muted || audio.volume === 0) ? 'muet' : audio.volume < 0.5 ? 'bas' : 'haut';
+      this.zoneVolume.dataset.niveau = niveau;
+      this.curseurVolume.value = pourcent;
+      this.curseurVolume.style.setProperty('--p', pourcent + '%');
+      this.boutonMuet.setAttribute('aria-label', niveau === 'muet' ? 'Réactiver le son' : 'Couper le son');
+    }
+
+    majVitesse() {
+      const vitesse = this.audio.playbackRate;
+      const texte = String(vitesse).replace('.', ',');
+      this.boutonVitesse.textContent = texte + '×';
+      this.boutonVitesse.setAttribute('aria-label', 'Vitesse de lecture : ' + texte);
+    }
+
+    afficherMessage(texte, erreur = true) {
+      this.messageEstErreur = !!texte && erreur;
+      this.zoneMessage.textContent = texte;
+      this.zoneMessage.classList.toggle('erreur-lecture', this.messageEstErreur);
+      this.zoneMessage.hidden = !texte;
+    }
+
+    // ── Forme d'onde ─────────────────────────────────────────────────────
+    async chargerFormeOnde() {
+      try {
+        if (!this.piste.waveform_url) throw new Error('Pas de forme d’onde');
+        const reponse = await fetch('./sc.php?action=forme_onde&url=' + encodeURIComponent(this.piste.waveform_url),
+          { signal: this.controleur.signal });
+        const resultat = await reponse.json();
+        if (!resultat.success || !Array.isArray(resultat.echantillons) || resultat.echantillons.length < 10) {
+          throw new Error('Forme d’onde indisponible');
+        }
+        this.echantillons = resultat.echantillons.map(Number);
+        this.recalculerBarres(false);
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        /* on garde l'onde de substitution */
+      }
+      if (this.detruit) return;
+      this.zoneOnde.classList.remove('chargement');
+      this.zoneOnde.removeAttribute('aria-busy');
+      this.demanderImage();
+    }
+
+    recalculerBarres(immediat) {
+      const nb = this.nbBarres;
+      if (!nb) return;
+      const source = this.echantillons, total = source.length;
+      const barres = new Float32Array(nb);
+      let plafond = 0;
+      for (let i = 0; i < nb; i++) {
+        const debut = Math.floor(i * total / nb);
+        const fin   = Math.max(debut + 1, Math.floor((i + 1) * total / nb));
+        let max = 0, somme = 0;
+        for (let j = debut; j < fin; j++) { const v = source[j]; if (v > max) max = v; somme += v; }
+        barres[i] = 0.55 * max + 0.45 * somme / (fin - debut);
+        if (barres[i] > plafond) plafond = barres[i];
+      }
+      for (let i = 0; i < nb; i++) barres[i] = Math.max(0.06, Math.pow(barres[i] / (plafond || 1), 0.85));
+      this.barres = barres;
+      if (immediat || this.affichage.length !== nb) {
+        this.affichage = Float32Array.from(barres);
+        this.bosse = new Float32Array(nb);
+      }
+      this.demanderImage();
+    }
+
+    redimensionner() {
+      if (this.detruit) return;
+      const rect = this.zoneOnde.getBoundingClientRect();
+      const largeur = Math.floor(rect.width), hauteur = Math.floor(rect.height);
+      if (!largeur || !hauteur) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 3);
+      if (largeur === this.largeur && hauteur === this.hauteur && dpr === this.dpr) return;
+
+      this.largeur = largeur; this.hauteur = hauteur; this.dpr = dpr;
+      this.canvas.width  = Math.round(largeur * dpr);
+      this.canvas.height = Math.round(hauteur * dpr);
+
+      const nb = Math.max(20, Math.floor(largeur / (largeur < 480 ? 4 : 5)));
+      this.nbBarres     = nb;
+      this.pas          = largeur / nb;
+      this.largeurBarre = this.pas * 0.6;
+
+      const degrade = this.ctx.createLinearGradient(0, 0, 0, hauteur);
+      degrade.addColorStop(0, this.couleurs.rougeClair);
+      degrade.addColorStop(0.5, this.couleurs.rouge);
+      degrade.addColorStop(1, this.couleurs.rougeClair);
+      this.degradeLu = degrade;
+
+      this.recalculerBarres(false);
+      this.dessiner(performance.now());
+    }
+
+    apparition(indice, maintenant) {
+      if (this.mouvementReduit) return 1;
+      const x = (maintenant - this.debutIntro - indice * 5) / 550;
+      if (x >= 1) return 1;
+      if (x <= 0) return 0;
+      return 1 - Math.pow(1 - x, 3);
+    }
+
+    introActive(maintenant) {
+      return !this.mouvementReduit && (maintenant - this.debutIntro) < this.nbBarres * 5 + 550;
+    }
+
+    demanderImage() {
+      if (this.detruit || this.imageDemandee) return;
+      this.imageDemandee = requestAnimationFrame(maintenant => {
+        this.imageDemandee = 0;
+        this.animer(maintenant);
+      });
+    }
+
+    animer(maintenant) {
+      const continuer = this.mettreAJourAnimation(maintenant);
+      if (this.enLecture) this.majTemps();
+      this.dessiner(maintenant);
+      if (continuer) this.demanderImage();
+    }
+
+    /** Fait évoluer la bosse sous le curseur et le fondu entre deux formes d'onde. Renvoie vrai tant qu'il reste à animer. */
+    mettreAJourAnimation(maintenant) {
+      const nb = this.nbBarres;
+      if (!nb) return false;
+      const enLecture = this.enLecture;
+      const xLecture = this.ratioAffiche() * this.largeur;
+      let stable = true;
+      for (let i = 0; i < nb; i++) {
+        const centre = (i + 0.5) * this.pas;
+        let cibleBosse = 0;
+        if (this.survol) { const d = (centre - this.xSurvol) / 70; cibleBosse += 0.34 * Math.exp(-d * d); }
+        if (enLecture)   { const d = (centre - xLecture) / 38;     cibleBosse += 0.14 * Math.exp(-d * d); }
+        const ecartBosse   = cibleBosse - this.bosse[i];
+        const ecartHauteur = this.barres[i] - this.affichage[i];
+        this.bosse[i]     = this.mouvementReduit ? cibleBosse : this.bosse[i] + ecartBosse * 0.22;
+        this.affichage[i] = this.mouvementReduit ? this.barres[i] : this.affichage[i] + ecartHauteur * 0.16;
+        if (Math.abs(ecartBosse) > 0.004 || Math.abs(ecartHauteur) > 0.004) stable = false;
+      }
+      return !stable || enLecture || this.glisse || this.introActive(maintenant);
+    }
+
+    dessiner(maintenant) {
+      const { ctx, largeur, hauteur, nbBarres: nb } = this;
+      if (!largeur || !nb) return;
+      ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+      ctx.clearRect(0, 0, largeur, hauteur);
+
+      const ratio    = this.ratioAffiche();
+      const xLecture = ratio * largeur;
+      const xSurvol  = this.survol ? this.xSurvol : -1;
+      const xMemoire = this.ratioMemoire * largeur;
+      const centreY  = hauteur / 2;
+
+      // Lueur autour de la tête de lecture
+      // (ellipse : le dégradé s'éteint exactement en haut et en bas, sans bord net)
+      if (xLecture > 0) {
+        const rayonX = Math.min(170, largeur * 0.4), rayonY = hauteur / 2;
+        const intensite = (this.enLecture || this.glisse) ? 0.16 : 0.07;
+        ctx.save();
+        ctx.translate(xLecture, centreY);
+        ctx.scale(rayonX / rayonY, 1);
+        const lueur = ctx.createRadialGradient(0, 0, 0, 0, 0, rayonY);
+        lueur.addColorStop(0,   'rgba(' + RVB_ROUGE + ', ' + intensite + ')');
+        lueur.addColorStop(0.55, 'rgba(' + RVB_ROUGE + ', ' + (intensite * 0.35).toFixed(3) + ')');
+        lueur.addColorStop(1,   'rgba(' + RVB_ROUGE + ', 0)');
+        ctx.fillStyle = lueur;
+        ctx.fillRect(-rayonY, -centreY, rayonY * 2, hauteur);
+        ctx.restore();
+      }
+
+      // Barres, regroupées par couleur pour limiter les appels de remplissage
+      const chemins = { lu: new Path2D(), apercu: new Path2D(), memoire: new Path2D(), reste: new Path2D() };
+      const hauteurMax = hauteur * 0.94;
+      for (let i = 0; i < nb; i++) {
+        const apparition = this.apparition(i, maintenant);
+        const h  = Math.min(hauteurMax, this.affichage[i] * (1 + this.bosse[i]) * hauteurMax) * apparition;
+        const hh = Math.max(4 * apparition, h);
+        if (hh < 0.5) continue;
+        const x = i * this.pas + (this.pas - this.largeurBarre) / 2;
+        const centre = x + this.largeurBarre / 2;
+        const chemin = centre <= xLecture ? chemins.lu
+                     : centre <= xSurvol  ? chemins.apercu
+                     : centre <= xMemoire ? chemins.memoire
+                     : chemins.reste;
+        rectArrondi(chemin, x, centreY - hh / 2, this.largeurBarre, hh, this.largeurBarre / 2);
+      }
+      ctx.fillStyle = this.couleurs.reste;   ctx.fill(chemins.reste);
+      ctx.fillStyle = this.couleurs.memoire; ctx.fill(chemins.memoire);
+      ctx.fillStyle = 'rgba(' + RVB_ROUGE + ', .34)'; ctx.fill(chemins.apercu);
+      ctx.fillStyle = this.degradeLu;        ctx.fill(chemins.lu);
+
+      // Repère de survol
+      if (xSurvol >= 0 && !this.glisse) {
+        ctx.fillStyle = 'rgba(' + RVB_ROUGE + ', .5)';
+        ctx.fillRect(Math.round(xSurvol) - 0.5, hauteur * 0.08, 1, hauteur * 0.84);
+      }
+
+      // Tête de lecture
+      if ((ratio > 0.001 && ratio < 0.999) || this.glisse) {
+        ctx.fillStyle = this.couleurs.rouge;
+        ctx.fillRect(xLecture - 1, hauteur * 0.04, 2, hauteur * 0.92);
+      }
+      if (this.survol || this.glisse) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(28, 28, 33, .3)';
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetY = 1;
+        ctx.beginPath();
+        ctx.arc(xLecture, centreY, 7, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.restore();
+        ctx.beginPath();
+        ctx.arc(xLecture, centreY, 7, 0, Math.PI * 2);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = this.couleurs.rouge;
+        ctx.stroke();
+      }
+    }
+
+    // ── Pointeur et clavier sur l'onde ───────────────────────────────────
+    ratioDepuis(evenement) {
+      const rect = this.zoneOnde.getBoundingClientRect();
+      return borner((evenement.clientX - rect.left) / rect.width, 0, 1);
+    }
+
+    survoler(evenement) {
+      const ratio = this.ratioDepuis(evenement);
+      this.survol  = true;
+      this.xSurvol = ratio * this.largeur;
+      this.infobulle.textContent = formaterTemps(ratio * this.duree);
+      this.infobulle.hidden = false;
+      const moitie = this.infobulle.offsetWidth / 2;
+      this.infobulle.style.left = borner(this.xSurvol, moitie, this.largeur - moitie) + 'px';
+      this.demanderImage();
+    }
+
+    quitterSurvol() {
+      this.survol = false;
+      this.infobulle.hidden = true;
+      this.demanderImage();
+    }
+
+    lierEvenements() {
+      const audio = this.audio, onde = this.zoneOnde;
+
+      this.boutonLecture.addEventListener('click', () => this.basculerLecture());
+      this.boutonReculer.addEventListener('click', () => this.decaler(-SAUT_SECONDES));
+      this.boutonAvancer.addEventListener('click', () => this.decaler(SAUT_SECONDES));
+      this.boutonVitesse.addEventListener('click', () => this.changerVitesse());
+      this.boutonMuet.addEventListener('click', () => this.basculerMuet());
+      this.curseurVolume.addEventListener('input', () => this.changerVolume(Number(this.curseurVolume.value) / 100));
+
+      onde.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') this.survoler(e); });
+      onde.addEventListener('pointermove', e => {
+        if (this.glisse) {
+          this.positionGlisse = this.ratioDepuis(e);
+          this.survoler(e);
+          this.majTemps();
+        } else if (e.pointerType === 'mouse') {
+          this.survoler(e);
+        }
+      });
+      onde.addEventListener('pointerleave', () => { if (!this.glisse) this.quitterSurvol(); });
+      onde.addEventListener('pointerdown', e => {
+        if (e.button !== undefined && e.button !== 0) return;
+        try { onde.setPointerCapture(e.pointerId); } catch (_) { /* capture facultative */ }
+        onde.focus({ preventScroll: true });
+        this.glisse = true;
+        this.positionGlisse = this.ratioDepuis(e);
+        this.survoler(e);
+        this.majTemps();
+      });
+      const relacher = e => {
+        if (!this.glisse) return;
+        this.glisse = false;
+        if (e.type === 'pointerup' && this.duree > 0) this.aller(this.positionGlisse * this.duree);
+        if (e.pointerType !== 'mouse' || !onde.matches(':hover')) this.quitterSurvol();
+        this.secondeAffichee = -1;
+        this.majTemps();
+        this.demanderImage();
+      };
+      onde.addEventListener('pointerup', relacher);
+      onde.addEventListener('pointercancel', relacher);
+
+      onde.addEventListener('keydown', e => {
+        const pas = e.shiftKey ? PAS_CLAVIER * 3 : PAS_CLAVIER;
+        switch (e.key) {
+          case 'ArrowLeft': case 'ArrowDown': this.decaler(-pas); break;
+          case 'ArrowRight': case 'ArrowUp':  this.decaler(pas); break;
+          case 'PageDown': this.decaler(-this.duree * 0.1); break;
+          case 'PageUp':   this.decaler(this.duree * 0.1); break;
+          case 'Home':     this.aller(0); break;
+          case 'End':      this.aller(this.duree); break;
+          case ' ': case 'k': case 'K': this.basculerLecture(); break;
+          case 'm': case 'M': this.basculerMuet(); break;
+          default: return;
+        }
+        e.preventDefault();
+      });
+
+      audio.addEventListener('play',    () => { this.termine = false; this.majEtat(); this.demanderImage(); });
+      audio.addEventListener('playing', () => { this.enAttente = false; this.majEtat(); this.demanderImage(); });
+      audio.addEventListener('pause',   () => { this.lectureDemandee = false; this.majEtat(); this.majTemps(); this.demanderImage(); });
+      audio.addEventListener('ended',   () => { this.termine = true; this.lectureDemandee = false; this.majEtat(); this.majTemps(); this.demanderImage(); });
+      audio.addEventListener('waiting', () => { this.enAttente = true; this.majEtat(); });
+      audio.addEventListener('canplay', () => { this.enAttente = false; this.majEtat(); });
+      audio.addEventListener('seeked',  () => { this.termine = false; this.majTemps(); this.majMemoire(); this.demanderImage(); });
+      audio.addEventListener('timeupdate', () => { this.majTemps(); this.majMemoire(); this.demanderImage(); });
+      audio.addEventListener('progress',   () => { this.majMemoire(); this.demanderImage(); });
+      audio.addEventListener('durationchange', () => { this.majTempsTotal(); this.verifierExtrait(); this.demanderImage(); });
+      audio.addEventListener('volumechange',   () => this.majVolume());
+      audio.addEventListener('ratechange',     () => this.majVitesse());
+      audio.addEventListener('error', () => {
+        if (this.detruit || !this.sourcePrete) return;
+        this.lectureDemandee = false;
+        this.majEtat();
+        this.afficherMessage('Le flux audio n’a pas pu être lu. Réessayez dans un instant.');
+      });
+    }
+
+    // ── Commandes système (écran verrouillé, touches multimédia) ─────────
+    configurerSessionMedia() {
+      if (!('mediaSession' in navigator)) return;
+      const nomArtiste = this.artiste && (this.artiste.full_name || this.artiste.username) || '';
+      const pochette = this.piste.artwork_url
+        ? [{ src: this.piste.artwork_url.replace('-large', '-t500x500'), sizes: '500x500' }]
+        : [];
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({ title: this.piste.title || '', artist: nomArtiste, artwork: pochette });
+      } catch (_) { /* métadonnées facultatives */ }
+      const actions = {
+        play:         () => this.lire(),
+        pause:        () => this.mettrePause(),
+        seekbackward: () => this.decaler(-SAUT_SECONDES),
+        seekforward:  () => this.decaler(SAUT_SECONDES),
+        seekto:       d => { if (typeof d.seekTime === 'number') this.aller(d.seekTime); },
+      };
+      for (const [nom, action] of Object.entries(actions)) {
+        try { navigator.mediaSession.setActionHandler(nom, action); } catch (_) { /* action non prise en charge */ }
+      }
+    }
+
+    detruire() {
+      this.detruit = true;
+      this.controleur.abort();
+      cancelAnimationFrame(this.imageDemandee);
+      this.observateur.disconnect();
+      try { this.audio.pause(); } catch (_) { /* déjà arrêté */ }
+      if (this.hls) { this.hls.destroy(); this.hls = null; }
+      this.audio.removeAttribute('src');
+      this.audio.load();
+      if ('mediaSession' in navigator) {
+        for (const nom of ['play', 'pause', 'seekbackward', 'seekforward', 'seekto']) {
+          try { navigator.mediaSession.setActionHandler(nom, null); } catch (_) { /* ignoré */ }
+        }
+        try { navigator.mediaSession.metadata = null; } catch (_) { /* ignoré */ }
+      }
+    }
+  }
+
+  let _lecteurActif = null;
+
+  function detruireLecteur() {
+    if (!_lecteurActif) return;
+    _lecteurActif.detruire();
+    _lecteurActif = null;
+  }
+
+  function initialiserLecteur(d) {
+    detruireLecteur();
+    const racine = document.querySelector('#resultats .lecteur');
+    if (!racine || !d.track || !d.api_client) return;
+    _lecteurActif = new LecteurOnde(racine, {
+      piste:     d.track,
+      artiste:   d.artist,
+      idClient:  d.api_client.id,
+      authPiste: d.track.track_authorization,
+    });
+  }
+
   // ── Rendu des résultats ──────────────────────────────────────────────────
   function htmlPiste(d) {
     const piste   = d.track;
@@ -644,6 +1539,7 @@
     const lienSoundcloud = estUrlHttp(piste.permalink_url)
       ? `<a class="bouton bouton-secondaire" href="${echapper(piste.permalink_url)}" target="_blank" rel="noopener">Ouvrir sur SoundCloud ${icone('externe', 16)}</a>`
       : '';
+    const lecteur = (peutTelecharger && classerFlux(piste.audio_streams).length) ? htmlLecteur() : '';
     const panneau = peutTelecharger
       ? `<div class="qualites" id="panneau-qualites"><div class="qualites-interieur"><div class="liste-qualites" id="liste-qualites">
            <div class="qualite-chargement" id="chargement-qualites"><span class="spinner"></span>Vérification des qualités disponibles…</div>
@@ -667,6 +1563,7 @@
         <div class="piste-actions">${boutonTelecharger}${lienSoundcloud}</div>
         ${panneau}
       </div>
+      ${lecteur}
       <dl class="details piste-details">
         ${ligneKv('Adresse', piste.permalink_url, true)}
         ${ligneKv('Mis en ligne le', piste.created_at && formaterDate(piste.created_at))}
@@ -744,6 +1641,7 @@
 
   function afficherResultats(d) {
     const zone = parId('resultats');
+    detruireLecteur();
     _fluxEnAttente = null;
 
     let html = '';
@@ -759,6 +1657,7 @@
     zone.hidden = false;
     parId('page').classList.add('a-des-resultats');
     initialiserTelechargement();
+    initialiserLecteur(d);
   }
 
   // ── Recherche directe : liste de titres ──────────────────────────────────
@@ -957,6 +1856,7 @@
 
   parId('resultats').addEventListener('click', async e => {
     if (e.target.closest('#bouton-retour') && _rechercheActive) {
+      detruireLecteur();
       parId('resultats').hidden = true;
       parId('resultats-recherche').hidden = false;
       champRecherche.value = _rechercheActive.requete;

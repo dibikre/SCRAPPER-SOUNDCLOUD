@@ -3,419 +3,352 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SC Scraper</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>SC Scraper – Infos et téléchargement SoundCloud</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --sc-orange:  #ff5500;
-      --sc-clair:   #fff;
-      --sc-panneau: #111111;
-      --sc-bordure: #1f1f1f;
-      --sc-attenue: #444444;
-      --sc-texte:   #e8e8e8;
+      --blanc: #fff; --encre: #1c1c21; --encre-douce: #5f5f6b;
+      --trait: #e9e9ee; --trait-fort: #d5d5dd; --voile: #f7f7f9;
+      --rouge: #e11d2e; --rouge-fonce: #bf111f; --rouge-pale: #fdeced; --rouge-bord: #f6c9cd;
+      --vert: #137a3d; --vert-pale: #e7f6ec; --vert-bord: #bfe5cc;
+      --rayon-moyen: 14px; --rayon-image: 18px; --rayon-grand: 28px;
+      --police-titre: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+      --police-texte: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --courbe: cubic-bezier(.2, .7, .2, 1);
     }
+    *, *::before, *::after { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; min-height: 100vh; background: var(--blanc); color: var(--encre); font: 400 1rem/1.55 var(--police-texte); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; } img { display: block; max-width: 100%; } button { font: inherit; } dl { margin: 0; }
+    .visuellement-cache { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .page { width: min(1040px, 100% - 2.5rem); margin-inline: auto; padding: 1.5rem 0 5rem; }
 
-    * { box-sizing: border-box; }
+    /* ── En-tête ── */
+    .entete { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .marque { display: inline-flex; align-items: center; gap: .65rem; font: 700 1.2rem/1 var(--police-titre); letter-spacing: -.01em; text-decoration: none; }
+    .marque-logo { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 11px; background: var(--rouge); }
+    .entete-note { color: var(--encre-douce); font-size: .9rem; }
 
-    body {
-      background-color: var(--sc-clair);
-      color: var(--sc-texte);
-      font-family: 'Space Mono', monospace;
-      min-height: 100vh;
-    }
+    /* ── Hero ── */
+    .hero { padding-top: clamp(2.5rem, 7vw, 5rem); transition: padding .55s var(--courbe); }
+    .intro { display: grid; grid-template-rows: 1fr; margin-bottom: 2rem; transition: grid-template-rows .55s var(--courbe), opacity .35s, margin .55s var(--courbe); }
+    .intro-contenu { min-height: 0; overflow: hidden; }
+    .titre-principal { max-width: 17ch; margin: 0; font: 800 clamp(2.3rem, 6.2vw, 4.4rem)/1.02 var(--police-titre); letter-spacing: -.035em; text-wrap: balance; }
+    .sous-titre { max-width: 54ch; margin: 1.25rem 0 0; color: var(--encre-douce); font-size: clamp(1.02rem, 1.6vw, 1.2rem); }
+    .a-des-resultats .hero { padding-top: 1.75rem; }
+    .a-des-resultats .intro { grid-template-rows: 0fr; margin-bottom: 0; opacity: 0; }
 
-    h1, h2, h3, .syne { font-family: 'Syne', sans-serif; }
+    /* ── Boutons ── */
+    .bouton { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border: 0; border-radius: 999px; font-weight: 700; text-decoration: none; white-space: nowrap; cursor: pointer; transition: background-color .18s, color .18s, border-color .18s, transform .1s; }
+    .bouton:focus-visible, .bouton-copier:focus-visible { outline: 3px solid rgba(225, 29, 46, .4); outline-offset: 3px; }
+    .bouton:disabled { opacity: .55; cursor: not-allowed; }
+    .bouton-primaire { padding: .85rem 1.7rem; background: var(--rouge); color: #fff; }
+    .bouton-primaire:hover:not(:disabled) { background: var(--rouge-fonce); }
+    .bouton-primaire:active:not(:disabled) { transform: scale(.98); }
+    .bouton-secondaire { padding: .8rem 1.4rem; background: #fff; color: var(--encre); border: 1.5px solid var(--trait-fort); }
+    .bouton-secondaire:hover { border-color: var(--encre); }
+    .bouton-contour { min-width: 9rem; padding: .5rem 1.1rem; background: #fff; color: var(--rouge); border: 1.5px solid var(--rouge); font-size: .9rem; }
+    .bouton-contour:hover:not(:disabled) { background: var(--rouge); color: #fff; }
+    .bouton-libelle { display: inline-flex; align-items: center; gap: .4rem; }
+    .bouton-contour .spinner { display: none; }
+    .bouton-contour.charge .spinner { display: inline-block; }
+    .bouton-contour.charge .bouton-libelle { display: none; }
 
-    #url-input {
-      background: transparent;
-      border: none;
-      border-bottom: 2px solid var(--sc-attenue);
-      color: #755c5c;
-      font-family: 'Space Mono', monospace;
-      font-size: 0.95rem;
-      transition: border-color .25s;
-      outline: none;
-      width: 100%;
-      padding: 0.5rem 0;
-    }
-    #url-input:focus { border-bottom-color: var(--sc-orange); }
-    #url-input::placeholder { color: #555; }
+    /* ── Recherche ── */
+    .recherche { display: flex; align-items: center; gap: .5rem; padding: .45rem .45rem .45rem 1.3rem; background: #fff; border: 1.5px solid var(--trait-fort); border-radius: 999px; box-shadow: 0 1px 2px rgba(28, 28, 33, .04); transition: border-color .2s, box-shadow .2s; }
+    .recherche:focus-within { border-color: var(--rouge); box-shadow: 0 0 0 4px rgba(225, 29, 46, .14); }
+    .recherche-icone { flex: none; color: #9a9aa6; }
+    .champ-url { flex: 1; min-width: 0; padding: .7rem .25rem; border: 0; outline: 0; background: transparent; color: var(--encre); font: inherit; font-size: 1.05rem; }
+    .champ-url::placeholder { color: #9a9aa6; }
+    #bouton-lancer { min-width: 8.5rem; }
 
-    #launch-btn {
-      background: var(--sc-orange);
-      color: #fff;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      letter-spacing: .08em;
-      border: none;
-      cursor: pointer;
-      padding: .55rem 1.8rem;
-      transition: opacity .2s, transform .1s;
-      white-space: nowrap;
-    }
-    #launch-btn:hover  { opacity: .85; }
-    #launch-btn:active { transform: scale(.97); }
-    #launch-btn:disabled { opacity: .45; cursor: not-allowed; }
+    /* ── Ondes (progression) ── */
+    .ondes { --hauteur: 96px; display: flex; align-items: center; gap: 3px; height: var(--hauteur); margin-top: 2.25rem; transition: height .55s var(--courbe), margin .55s var(--courbe); }
+    .a-des-resultats .ondes { --hauteur: 36px; margin-top: 1.25rem; }
+    .onde { flex: 1 1 0; min-width: 2px; height: var(--h); border-radius: 999px; background: var(--trait); transition: background-color .25s; animation: monter .7s var(--courbe) backwards; }
+    .onde.active { background: var(--rouge); }
+    @keyframes monter { from { transform: scaleY(.04); opacity: 0; } to { transform: none; opacity: 1; } }
 
-    .spinner {
-      width: 20px; height: 20px;
-      border: 2px solid #333;
-      border-top-color: var(--sc-orange);
-      border-radius: 50%;
-      animation: rotation .7s linear infinite;
-      display: inline-block;
-    }
+    /* ── Statut ── */
+    .statut { margin-top: 1.25rem; }
+    .chargement { display: flex; align-items: center; gap: .7rem; color: var(--encre-douce); }
+    .erreur { display: flex; align-items: flex-start; gap: .75rem; padding: 1rem 1.25rem; background: var(--rouge-pale); border: 1px solid var(--rouge-bord); border-radius: var(--rayon-moyen); color: #8f1019; }
+    .erreur svg { flex: none; margin-top: .15rem; }
+    .spinner { flex: none; display: inline-block; width: 18px; height: 18px; border: 2px solid var(--trait-fort); border-top-color: var(--rouge); border-radius: 50%; animation: rotation .7s linear infinite; }
+    .spinner-blanc { border-color: rgba(255, 255, 255, .4); border-top-color: #fff; }
     @keyframes rotation { to { transform: rotate(360deg); } }
 
-    .carte {
-      background: var(--sc-panneau);
-      border: 1px solid var(--sc-bordure);
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-    }
+    /* ── Résultats ── */
+    .resultats { display: grid; gap: 3rem; margin-top: 2.25rem; animation: apparition .5s var(--courbe) both; }
+    @keyframes apparition { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    .vide { padding: 2rem; border: 1px dashed var(--trait-fort); border-radius: var(--rayon-moyen); color: var(--encre-douce); text-align: center; }
 
-    .carte-titre {
-      font-family: 'Syne', sans-serif;
-      font-weight: 800;
-      font-size: .65rem;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: var(--sc-orange);
-      margin-bottom: 1rem;
-      padding-bottom: .5rem;
-      border-bottom: 1px solid var(--sc-bordure);
-    }
+    .puces { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .puce { display: inline-flex; align-items: center; padding: .2rem .75rem; background: #fff; border: 1px solid var(--trait); border-radius: 999px; color: var(--encre-douce); font-size: .85rem; font-weight: 600; }
+    .puce-rouge { background: var(--rouge-pale); border-color: var(--rouge-bord); color: var(--rouge-fonce); }
+    .puce-verte { background: var(--vert-pale); border-color: var(--vert-bord); color: var(--vert); }
 
-    .bloc-stat {
-      display: flex;
-      flex-direction: column;
-      gap: .15rem;
-    }
-    .etiquette-stat {
-      font-size: .6rem;
-      letter-spacing: .15em;
-      text-transform: uppercase;
-      color: var(--sc-attenue);
-    }
-    .valeur-stat {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: var(--sc-texte);
-    }
-    .valeur-stat.grande {
-      font-size: 1.6rem;
-    }
+    /* Titre */
+    .piste { --trait: #e3e3e9; display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 2rem 2.75rem; padding: clamp(1.25rem, 3vw, 2rem); background: var(--voile); border-radius: var(--rayon-grand); }
+    .pochette { width: 100%; aspect-ratio: 1; object-fit: cover; background: #ececf1; border-radius: var(--rayon-image); box-shadow: 0 18px 40px -18px rgba(28, 28, 33, .4); }
+    .pochette-vide { display: grid; place-items: center; color: #c3c3cc; }
+    .piste-artiste { display: flex; align-items: center; gap: .6rem; margin: 0; color: var(--encre-douce); font-weight: 600; }
+    .piste-titre { margin: .6rem 0 1rem; font: 800 clamp(1.8rem, 4vw, 2.9rem)/1.05 var(--police-titre); letter-spacing: -.03em; overflow-wrap: anywhere; text-wrap: balance; }
+    .piste-description { max-width: 62ch; margin: 1.1rem 0 0; color: var(--encre-douce); white-space: pre-line; }
+    .piste-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+    .piste-details { grid-column: 1 / -1; }
 
-    .ligne-kv {
-      display: flex;
-      gap: .75rem;
-      padding: .45rem 0;
-      border-bottom: 1px solid var(--sc-bordure);
-      align-items: flex-start;
-      font-size: .82rem;
-    }
-    .ligne-kv:last-child { border-bottom: none; }
-    .cle-kv {
-      color: var(--sc-attenue);
-      min-width: 160px;
-      flex-shrink: 0;
-      font-size: .75rem;
-      padding-top: .05rem;
-    }
-    .val-kv { color: var(--sc-texte); word-break: break-all; }
-    .val-kv a { color: var(--sc-orange); text-decoration: none; }
-    .val-kv a:hover { text-decoration: underline; }
+    .stats-piste { display: flex; flex-wrap: wrap; gap: 1.25rem 2.5rem; margin-top: 1.6rem; }
+    .stat { display: flex; flex-direction: column-reverse; }
+    .stat dt { color: var(--encre-douce); font-size: .85rem; }
+    .stat dd { margin: 0; font: 700 1.6rem/1.15 var(--police-titre); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 
-    .badge {
-      display: inline-block;
-      background: #1a1a1a;
-      border: 1px solid var(--sc-bordure);
-      font-size: .7rem;
-      padding: .15rem .5rem;
-      color: #aaa;
-    }
-    .badge.orange { border-color: var(--sc-orange); color: var(--sc-orange); }
-    .badge.vert   { border-color: #22c55e; color: #22c55e; }
+    /* Qualités */
+    .qualites { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .4s var(--courbe); }
+    .qualites.ouvert { grid-template-rows: 1fr; }
+    .qualites-interieur { min-height: 0; overflow: hidden; visibility: hidden; transition: visibility 0s .4s; }
+    .qualites.ouvert .qualites-interieur { visibility: visible; transition-delay: 0s; }
+    .liste-qualites { display: grid; gap: .6rem; padding-top: 1.25rem; }
+    .qualite-chargement { display: flex; align-items: center; gap: .7rem; color: var(--encre-douce); }
+    .ligne-qualite { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .85rem 1rem; padding: .85rem 1rem; background: #fff; border: 1px solid var(--trait); border-radius: var(--rayon-moyen); }
+    .format-pastille { display: grid; place-items: center; width: 48px; height: 48px; background: var(--voile); border-radius: 12px; font: 700 .8rem var(--police-titre); }
+    .qualite-titre { font-weight: 700; }
+    .qualite-detail { margin-bottom: .4rem; color: var(--encre-douce); font-size: .85rem; overflow-wrap: anywhere; }
+    .ligne-qualite .puce { padding: .05rem .6rem; font-size: .78rem; }
+    .progression-telechargement { grid-column: 1 / -1; display: flex; align-items: center; gap: .75rem; }
+    .progression-fond { flex: 1; height: 6px; overflow: hidden; background: var(--trait); border-radius: 99px; }
+    .progression-barre { width: 0; height: 100%; background: var(--rouge); border-radius: 99px; transition: width .15s ease; }
+    .progression-etiquette { min-width: 8.5rem; color: var(--encre-douce); font-size: .8rem; text-align: right; font-variant-numeric: tabular-nums; }
+    .progression-telechargement.termine .progression-barre { background: var(--vert); }
+    .progression-telechargement.termine .progression-etiquette { color: var(--vert); font-weight: 700; }
+    .progression-telechargement.echec .progression-barre { background: var(--rouge-fonce); }
+    .progression-telechargement.echec .progression-etiquette { color: var(--rouge-fonce); font-weight: 700; }
+    .qualite-erreur { grid-column: 1 / -1; margin: 0; color: var(--rouge-fonce); font-size: .85rem; }
 
-    #error-box {
-      border-left: 3px solid #e53e3e;
-      background: #1a0a0a;
-      padding: 1rem 1.25rem;
-      font-size: .85rem;
-      color: #fc8181;
-    }
+    /* Rubriques */
+    .rubrique { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 1.5rem 3rem; padding-top: 2.25rem; border-top: 1px solid var(--trait); }
+    .rubrique-titre { margin: 0; font: 700 1.35rem/1.2 var(--police-titre); letter-spacing: -.02em; }
+    .banniere { width: 100%; height: 140px; margin-bottom: 1.5rem; object-fit: cover; border-radius: var(--rayon-moyen); }
+    .artiste-entete { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+    .avatar { flex: none; width: 72px; height: 72px; object-fit: cover; background: var(--voile); border: 1px solid var(--trait); border-radius: 50%; }
+    .avatar-mini { width: 28px; height: 28px; }
+    .artiste-nom { display: flex; align-items: center; gap: .4rem; font: 700 1.35rem/1.2 var(--police-titre); letter-spacing: -.02em; }
+    .artiste-pseudo { color: var(--encre-douce); }
+    .artiste-entete .puces { flex-basis: 100%; }
+    .stats-artiste { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1.5rem; margin: 1.75rem 0; }
 
-    #artwork-img {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      display: block;
-    }
-    #banner-img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      display: block;
-    }
+    /* Détails */
+    .details { border-top: 1px solid var(--trait); }
+    .piste-details { margin-top: .25rem; }
+    .detail { display: grid; grid-template-columns: 10.5rem minmax(0, 1fr) auto; align-items: baseline; gap: .25rem 1rem; padding: .8rem 0; border-bottom: 1px solid var(--trait); }
+    .detail-cle { color: var(--encre-douce); font-size: .9rem; }
+    .detail-valeur { margin: 0; overflow-wrap: anywhere; white-space: pre-line; font-variant-numeric: tabular-nums; }
+    .detail-valeur a { color: var(--rouge); font-weight: 600; text-decoration: none; }
+    .detail-valeur a:hover { text-decoration: underline; }
+    .bouton-copier { display: inline-flex; align-items: center; gap: .3rem; padding: .15rem .7rem; background: #fff; border: 1px solid var(--trait-fort); border-radius: 999px; color: var(--encre-douce); font-size: .8rem; font-weight: 600; cursor: pointer; transition: border-color .15s, color .15s, background-color .15s; }
+    .bouton-copier:hover { border-color: var(--rouge); color: var(--rouge); }
+    .bouton-copier.copie { background: var(--vert-pale); border-color: var(--vert); color: var(--vert); }
 
-    #avatar-img {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--sc-orange);
+    @media (max-width: 860px) {
+      .piste { grid-template-columns: 1fr; }
+      .pochette { max-width: 320px; }
+      .rubrique { grid-template-columns: 1fr; gap: 1rem; }
     }
-
-    .point-verifie {
-      display: inline-block;
-      width: 8px; height: 8px;
-      background: var(--sc-orange);
-      border-radius: 50%;
+    @media (max-width: 640px) {
+      .entete-note, .recherche-icone { display: none; }
+      .recherche { padding-left: .6rem; }
+      #bouton-lancer { min-width: 7.5rem; padding-inline: 1.2rem; }
+      .detail { grid-template-columns: minmax(0, 1fr) auto; }
+      .detail-cle { grid-column: 1 / -1; }
+      .ligne-qualite { grid-template-columns: auto 1fr; }
+      .bouton-telecharger { grid-column: 1 / -1; width: 100%; }
     }
-
-    .fade-in {
-      animation: apparition .4s ease forwards;
-    }
-    @keyframes apparition { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
-
-    .btn-copier {
-      font-size: .65rem;
-      padding: .1rem .4rem;
-      border: 1px solid var(--sc-attenue);
-      background: transparent;
-      color: var(--sc-attenue);
-      cursor: pointer;
-      font-family: 'Space Mono', monospace;
-      transition: border-color .2s, color .2s;
-    }
-    .btn-copier:hover { border-color: var(--sc-orange); color: var(--sc-orange); }
-
-    #barre-progression {
-      height: 2px;
-      background: var(--sc-orange);
-      width: 0%;
-      transition: width .3s;
-    }
-
-    .grille-sections {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-    }
-
-    /* ── Bouton téléchargement & liste qualités ── */
-    .btn-dl {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      background: var(--sc-orange);
-      color: #fff;
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-      font-size: .8rem;
-      letter-spacing: .06em;
-      border: none;
-      cursor: pointer;
-      padding: .55rem 1.4rem;
-      transition: opacity .2s, transform .1s;
-    }
-    .btn-dl:hover  { opacity: .85; }
-    .btn-dl:active { transform: scale(.97); }
-    .btn-dl:disabled { opacity: .45; cursor: not-allowed; }
-
-    .liste-qualites {
-      margin-top: .75rem;
-      border: 1px solid var(--sc-bordure);
-      background: #0d0d0d;
-      display: none;
-    }
-    .liste-qualites.open { display: block; }
-
-    .quality-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: .75rem;
-      padding: .65rem 1rem;
-      border-bottom: 1px solid var(--sc-bordure);
-      font-size: .8rem;
-    }
-    .quality-row:last-child { border-bottom: none; }
-    .quality-row-info {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      flex: 1;
-    }
-
-    .dl-quality-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .35rem;
-      background: transparent;
-      border: 1px solid var(--sc-orange);
-      color: var(--sc-orange);
-      font-family: 'Space Mono', monospace;
-      font-size: .7rem;
-      padding: .25rem .75rem;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background .15s, color .15s;
-    }
-    .dl-quality-btn:hover { background: var(--sc-orange); color: #fff; }
-    .dl-quality-btn:disabled { opacity: .45; cursor: not-allowed; }
-
-    .dl-quality-btn .btn-spinner {
-      width: 12px; height: 12px;
-      border: 1.5px solid rgba(255,255,255,.3);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: rotation .7s linear infinite;
-      display: none;
-    }
-    .dl-quality-btn.loading .btn-spinner { display: inline-block; }
-    .dl-quality-btn.loading .btn-label   { display: none; }
-
-    .dl-progress-wrap {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      margin-top: .5rem;
-      width: 100%;
-      grid-column: 1 / -1;
-    }
-    .dl-progress-bar-bg {
-      flex: 1;
-      height: 3px;
-      background: var(--sc-bordure);
-      overflow: hidden;
-    }
-    .dl-progress-bar {
-      height: 100%;
-      background: var(--sc-orange);
-      transition: width .15s ease;
-    }
-    .dl-progress-label {
-      font-size: .6rem;
-      color: var(--sc-attenue);
-      white-space: nowrap;
-      min-width: 80px;
-      text-align: right;
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
     }
   </style>
 </head>
-<body class="p-6 md:p-10">
+<body>
+  <div class="page" id="page">
 
-  <!-- En-tête -->
-  <header class="mb-10">
-    <div class="flex items-center gap-3 mb-1">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--sc-orange)">
-        <path d="M1.175 12.225c-.056 0-.094.034-.1.087l-.328 2.209.328 2.229c.006.058.044.086.1.086.055 0 .094-.03.1-.086l.373-2.229-.373-2.21c-.006-.054-.045-.086-.1-.086zm1.49-.88c-.07 0-.12.05-.127.12l-.3 3.09.3 3.12c.007.07.057.12.127.12.07 0 .12-.05.127-.12l.34-3.12-.34-3.09c-.007-.07-.057-.12-.127-.12zm1.519-.284c-.085 0-.148.065-.153.152l-.27 3.374.27 3.404c.005.088.068.153.153.153.086 0 .148-.065.153-.153l.308-3.404-.308-3.374c-.005-.087-.067-.152-.153-.152zm1.547.018c-.1 0-.176.078-.18.178l-.24 3.356.24 3.392c.004.1.08.178.18.178.1 0 .176-.078.18-.178l.272-3.392-.272-3.356c-.004-.1-.08-.178-.18-.178zm1.574-.5c-.116 0-.207.093-.21.21l-.21 3.856.21 3.896c.003.117.094.21.21.21.117 0 .207-.093.21-.21l.237-3.896-.237-3.856c-.003-.117-.093-.21-.21-.21zm1.598-.123c-.13 0-.232.105-.234.235l-.18 3.979.18 4.02c.002.13.104.235.234.235.13 0 .232-.105.234-.235l.205-4.02-.205-3.979c-.002-.13-.104-.235-.234-.235zm1.624-.108c-.145 0-.26.118-.262.264l-.15 4.087.15 4.127c.002.146.117.264.262.264.145 0 .26-.118.262-.264l.17-4.127-.17-4.087c-.002-.146-.117-.264-.262-.264zm1.65-.013c-.16 0-.287.13-.288.29l-.12 4.1.12 4.14c.001.16.128.29.288.29.16 0 .287-.13.288-.29l.136-4.14-.136-4.1c-.001-.16-.128-.29-.288-.29zm1.674.016c-.174 0-.313.14-.314.315l-.09 4.084.09 4.124c.001.174.14.315.314.315.174 0 .313-.14.314-.315l.103-4.124-.103-4.084c-.001-.175-.14-.315-.314-.315zm1.698-.08c-.188 0-.337.15-.338.34l-.06 4.164.06 4.2c.001.19.15.34.338.34.188 0 .337-.15.338-.34l.068-4.2-.068-4.164c-.001-.19-.15-.34-.338-.34zm5.765 1.788c-.27 0-.528.05-.768.14-.158-1.822-1.7-3.246-3.578-3.246-.487 0-.954.1-1.368.277-.15.063-.19.127-.192.19v6.376c.002.065.048.116.112.127H22.86c.62 0 1.14-.52 1.14-1.154v-.004c0-1.5-1.21-2.716-2.706-2.716z"/>
-      </svg>
-      <h1 class="syne text-2xl font-extrabold tracking-tight" style="color:var(--sc-orange)">SC SCRAPER</h1>
-    </div>
-    <p class="text-xs" style="color:var(--sc-attenue)">Extracteur de métadonnées SoundCloud</p>
-  </header>
+    <header class="entete">
+      <a class="marque" href="./">
+        <span class="marque-logo">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="#fff" aria-hidden="true">
+            <rect x="3" y="8" width="3" height="6" rx="1.5"/><rect x="8" y="4" width="3" height="14" rx="1.5"/>
+            <rect x="13" y="7" width="3" height="8" rx="1.5"/><rect x="18" y="9.5" width="3" height="3" rx="1.5"/>
+          </svg>
+        </span>
+        SC Scraper
+      </a>
+      <span class="entete-note">Extracteur de métadonnées SoundCloud</span>
+    </header>
 
-  <!-- Barre de recherche -->
-  <div class="mb-10 max-w-3xl mx-auto">
-    <div class="flex gap-3 items-end">
-      <div class="flex-1">
-        <label class="block text-xs mb-2" style="color:var(--sc-attenue);letter-spacing:.15em;text-transform:uppercase">URL SoundCloud</label>
-        <input id="url-input" type="url" placeholder="https://soundcloud.com/artiste/titre" autocomplete="off" spellcheck="false" />
+    <main class="hero">
+      <div class="intro">
+        <div class="intro-contenu">
+          <h1 class="titre-principal">Toutes les infos d’un titre SoundCloud, en un seul lien.</h1>
+          <p class="sous-titre">Collez l’adresse d’un titre ou d’un profil&nbsp;: statistiques, métadonnées éditeur et téléchargement audio.</p>
+        </div>
       </div>
-      <button id="launch-btn">LANCER</button>
-    </div>
-    <div class="mt-2" style="height:2px;background:#1a1a1a;">
-      <div id="barre-progression"></div>
-    </div>
-  </div>
 
-  <!-- Statut / erreur -->
-  <div id="status-area" class="mb-6 hidden">
-    <div id="loading-box" class="hidden flex items-center gap-3 text-sm" style="color:var(--sc-attenue)">
-      <span class="spinner"></span>
-      <span id="loading-msg">Récupération en cours…</span>
-    </div>
-    <div id="error-box" class="hidden"></div>
-  </div>
+      <form class="recherche" id="formulaire" novalidate>
+        <svg class="recherche-icone" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 11.5a3.5 3.5 0 0 0 5 0l2.5-2.5a3.5 3.5 0 0 0-5-5l-1 1M11.5 8.5a3.5 3.5 0 0 0-5 0L4 11a3.5 3.5 0 0 0 5 5l1-1"/></svg>
+        <label class="visuellement-cache" for="champ-url">Adresse SoundCloud</label>
+        <input id="champ-url" class="champ-url" type="url" placeholder="https://soundcloud.com/artiste/titre" autocomplete="off" spellcheck="false" inputmode="url" />
+        <button id="bouton-lancer" class="bouton bouton-primaire" type="submit">Analyser</button>
+      </form>
 
-  <!-- Résultats -->
-  <div id="results" class="hidden fade-in"></div>
+      <div class="ondes" id="ondes" aria-hidden="true"></div>
+
+      <div class="statut" id="zone-statut" hidden>
+        <div class="chargement" id="boite-chargement" role="status" hidden>
+          <span class="spinner"></span><span id="message-chargement">Récupération en cours…</span>
+        </div>
+        <div class="erreur" id="boite-erreur" role="alert" hidden></div>
+      </div>
+
+      <div class="resultats" id="resultats" hidden></div>
+    </main>
+  </div>
 
   <script>
   // ── Utilitaires ──────────────────────────────────────────────────────────
-  const parId   = id => document.getElementById(id);
+  const parId    = id => document.getElementById(id);
   const formater = n => (n == null ? '—' : Number(n).toLocaleString('fr-FR'));
-  const echapper = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const echapper = s => s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  const couper   = (texte, max) => texte.length > max ? texte.slice(0, max).trimEnd() + '…' : texte;
+  const estUrlHttp = u => /^https?:\/\//i.test(u || '');
+  function formaterDate(iso) {
+    const date = new Date(iso);
+    return isNaN(date) ? String(iso) : date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  const CHEMINS_ICONES = {
+    telecharger: '<path d="M10 3v9.5M6 9l4 4 4-4M4 16h12"/>',
+    haut:        '<path d="M5 12l5-5 5 5"/>',
+    externe:     '<path d="M8 4H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3M11 4h5v5M16 4l-7 7"/>',
+    copier:      '<rect x="7" y="7" width="9" height="9" rx="2"/><path d="M13 7V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h2"/>',
+    alerte:      '<circle cx="10" cy="10" r="8"/><path d="M10 6v5M10 13.8v.2"/>',
+    note:        '<path d="M8 15V5l8-2v10"/><circle cx="6" cy="15" r="2.2"/><circle cx="14" cy="13" r="2.2"/>',
+  };
+  const icone = (nom, taille = 18) =>
+    `<svg width="${taille}" height="${taille}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CHEMINS_ICONES[nom]}</svg>`;
+  const ICONE_VERIFIE = '<svg width="20" height="20" viewBox="0 0 20 20" role="img"><title>Compte vérifié</title><circle cx="10" cy="10" r="10" fill="currentColor"/><path d="M5.8 10.4l2.8 2.8 5.6-6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   function ligneKv(cle, valeur, estLien = false, copiable = false) {
     if (valeur == null || valeur === '') return '';
-    let affichage = estLien
-      ? `<a href="${echapper(valeur)}" target="_blank" rel="noopener">${echapper(valeur)}</a>`
-      : `<span>${echapper(String(valeur))}</span>`;
-    let boutonCopie = copiable
-      ? `<button class="btn-copier" data-copy="${echapper(String(valeur))}">COPIER</button>`
+    const texte = String(valeur);
+    const affichage = estLien && estUrlHttp(texte)
+      ? `<a href="${echapper(texte)}" target="_blank" rel="noopener">${echapper(texte)}</a>`
+      : echapper(texte);
+    const boutonCopie = copiable
+      ? `<button type="button" class="bouton-copier" data-copie="${echapper(texte)}">${icone('copier', 14)}<span>Copier</span></button>`
       : '';
-    return `<div class="ligne-kv">
-      <span class="cle-kv">${echapper(cle)}</span>
-      <span class="val-kv flex-1">${affichage}</span>
-      ${boutonCopie}
-    </div>`;
+    return `<div class="detail"><dt class="detail-cle">${echapper(cle)}</dt><dd class="detail-valeur">${affichage}</dd>${boutonCopie}</div>`;
+  }
+  const htmlStat = (libelle, valeur) => `<div class="stat"><dt>${libelle}</dt><dd>${valeur}</dd></div>`;
+
+  // ── Ondes : décor du hero et indicateur de progression ───────────────────
+  function generateurAleatoire(graine) {
+    return function () {
+      graine |= 0; graine = graine + 0x6D2B79F5 | 0;
+      let t = Math.imul(graine ^ graine >>> 15, 1 | graine);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  let pourcentageOndes = 0;
+  let ondesAnimees = false;
+
+  function mettreAJourOndes(pourcentage) {
+    pourcentageOndes = pourcentage;
+    const barres = parId('ondes').children;
+    const limite = Math.round(barres.length * pourcentage / 100);
+    for (let i = 0; i < barres.length; i++) barres[i].classList.toggle('active', i < limite);
+  }
+
+  function genererOndes() {
+    const conteneur = parId('ondes');
+    const nombre = Math.max(24, Math.floor(conteneur.clientWidth / 9));
+    if (nombre === conteneur.children.length) return;
+    const aleatoire = generateurAleatoire(2718);
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < nombre; i++) {
+      const hauteur = Math.min(100, 16 + 84 * Math.abs(0.55 * Math.sin(i * 0.23) + 0.32 * Math.sin(i * 0.071 + 1.3)) * (0.4 + 0.6 * aleatoire()));
+      const barre = document.createElement('span');
+      barre.className = 'onde';
+      barre.style.setProperty('--h', hauteur.toFixed(1) + '%');
+      if (ondesAnimees) barre.style.animation = 'none';
+      else barre.style.animationDelay = Math.round(i / nombre * 900) + 'ms';
+      fragment.appendChild(barre);
+    }
+    conteneur.replaceChildren(fragment);
+    ondesAnimees = true;
+    mettreAJourOndes(pourcentageOndes);
   }
 
   // ── Animation de progression ─────────────────────────────────────────────
   let minuteurProgression = null;
+  let minuteurRetour = null;
   function demarrerProgression() {
-    const barre = parId('barre-progression');
-    barre.style.width = '0%';
+    clearInterval(minuteurProgression);
+    clearTimeout(minuteurRetour);
+    mettreAJourOndes(0);
     let valeur = 0;
     minuteurProgression = setInterval(() => {
       valeur = Math.min(valeur + Math.random() * 8, 88);
-      barre.style.width = valeur + '%';
+      mettreAJourOndes(valeur);
     }, 250);
   }
   function terminerProgression(succes = true) {
     clearInterval(minuteurProgression);
-    const barre = parId('barre-progression');
-    barre.style.background = succes ? 'var(--sc-orange)' : '#e53e3e';
-    barre.style.width = '100%';
-    setTimeout(() => { barre.style.width = '0%'; barre.style.background = 'var(--sc-orange)'; }, 700);
+    mettreAJourOndes(succes ? 100 : 0);
+    if (succes) minuteurRetour = setTimeout(() => mettreAJourOndes(0), 900);
   }
 
   // ── États de l'interface ─────────────────────────────────────────────────
+  function definirLancement(enCours) {
+    const bouton = parId('bouton-lancer');
+    bouton.disabled = enCours;
+    bouton.textContent = enCours ? 'Analyse…' : 'Analyser';
+  }
   function afficherChargement(msg = 'Récupération en cours…') {
-    parId('status-area').classList.remove('hidden');
-    parId('loading-box').classList.remove('hidden');
-    parId('error-box').classList.add('hidden');
-    parId('loading-msg').textContent = msg;
-    parId('results').classList.add('hidden');
-    parId('launch-btn').disabled = true;
+    parId('zone-statut').hidden = false;
+    parId('boite-chargement').hidden = false;
+    parId('boite-erreur').hidden = true;
+    parId('message-chargement').textContent = msg;
+    parId('resultats').hidden = true;
+    definirLancement(true);
     demarrerProgression();
   }
   function afficherErreur(msg) {
-    parId('status-area').classList.remove('hidden');
-    parId('loading-box').classList.add('hidden');
-    parId('error-box').classList.remove('hidden');
-    parId('error-box').textContent = msg;
-    parId('results').classList.add('hidden');
-    parId('launch-btn').disabled = false;
+    parId('zone-statut').hidden = false;
+    parId('boite-chargement').hidden = true;
+    const boite = parId('boite-erreur');
+    boite.hidden = false;
+    boite.innerHTML = icone('alerte', 20) + '<span>' + echapper(msg) + '</span>';
+    parId('resultats').hidden = true;
+    definirLancement(false);
     terminerProgression(false);
   }
   function masquerStatut() {
-    parId('status-area').classList.add('hidden');
-    parId('loading-box').classList.add('hidden');
-    parId('error-box').classList.add('hidden');
+    parId('zone-statut').hidden = true;
+    parId('boite-chargement').hidden = true;
+    parId('boite-erreur').hidden = true;
   }
 
   // ── Requête principale ───────────────────────────────────────────────────
   let _donneesActuelles = null;
+  let _fluxEnAttente = null;
 
   async function lancer() {
-    let url = parId('url-input').value.trim();
+    let url = parId('champ-url').value.trim();
     if (!url) { afficherErreur('Veuillez entrer une URL SoundCloud.'); return; }
 
     // Nettoyer l'URL : garder uniquement scheme://host/path
@@ -438,7 +371,7 @@
 
       terminerProgression(true);
       masquerStatut();
-      parId('launch-btn').disabled = false;
+      definirLancement(false);
       afficherResultats(_donneesActuelles);
 
     } catch (e) {
@@ -447,32 +380,27 @@
   }
 
   // ── Téléchargement côté client : fetch M3U8 → segments → Blob → <a download>
-  async function demarrerTelechargement(btn, urlM3u8, jetonLicence, preset, titreTrack) {
-    btn.classList.add('loading');
-    btn.disabled = true;
+  async function demarrerTelechargement(bouton, urlM3u8, jetonLicence, profil, titrePiste) {
+    bouton.classList.add('charge');
+    bouton.disabled = true;
 
-    // Créer ou réutiliser la barre de progression liée à ce bouton
-    let enveloppeProg = btn.closest('.quality-row').querySelector('.dl-progress-wrap');
-    if (!enveloppeProg) {
-      enveloppeProg = document.createElement('div');
-      enveloppeProg.className = 'dl-progress-wrap';
-      enveloppeProg.innerHTML = `
-        <div class="dl-progress-bar-bg">
-          <div class="dl-progress-bar" style="width:0%"></div>
-        </div>
-        <span class="dl-progress-label">0%</span>`;
-      btn.closest('.quality-row').appendChild(enveloppeProg);
-    }
-    const barre    = enveloppeProg.querySelector('.dl-progress-bar');
-    const etiquette = enveloppeProg.querySelector('.dl-progress-label');
+    const ligne       = bouton.closest('.ligne-qualite');
+    const enveloppe   = ligne.querySelector('.progression-telechargement');
+    const barre       = enveloppe.querySelector('.progression-barre');
+    const etiquette   = enveloppe.querySelector('.progression-etiquette');
+    const boiteErreur = ligne.querySelector('.qualite-erreur');
+
+    enveloppe.hidden = false;
+    enveloppe.classList.remove('termine', 'echec');
+    boiteErreur.hidden = true;
 
     function mettreAJourProgression(actuel, total, phase) {
       const pct = total > 0 ? Math.round((actuel / total) * 100) : 0;
       barre.style.width = pct + '%';
-      etiquette.textContent = phase === 'init'  ? 'Init…'
-                            : phase === 'done'  ? '✓ Enregistré'
-                            : phase === 'blob'  ? 'Finalisation…'
-                            : `${pct}% · seg ${actuel}/${total}`;
+      etiquette.textContent = phase === 'init' ? 'Préparation…'
+                            : phase === 'done' ? '✓ Enregistré'
+                            : phase === 'blob' ? 'Finalisation…'
+                            : `${pct}\u00A0% · segment ${actuel}/${total}`;
     }
 
     try {
@@ -514,335 +442,299 @@
 
       // Assemblage
       mettreAJourProgression(total, total, 'blob');
-      const ext      = preset.includes('opus') ? 'opus' : 'm4a';
+      const ext      = profil.includes('opus') ? 'opus' : 'm4a';
       const typeMime = ext === 'opus' ? 'audio/ogg' : 'audio/mp4';
       const blob     = new Blob(morceaux, { type: typeMime });
       const urlBlob  = URL.createObjectURL(blob);
       const lien     = document.createElement('a');
       lien.href      = urlBlob;
-      lien.download  = (titreTrack || 'track').replace(/[^a-z0-9 \-_]/gi, '_')
-                     + '_' + preset + '.' + ext;
+      lien.download  = (titrePiste || 'track').replace(/[^a-z0-9 \-_]/gi, '_')
+                     + '_' + profil + '.' + ext;
       document.body.appendChild(lien);
       lien.click();
       document.body.removeChild(lien);
       setTimeout(() => URL.revokeObjectURL(urlBlob), 5000);
       mettreAJourProgression(total, total, 'done');
+      enveloppe.classList.add('termine');
 
     } catch (e) {
-      barre.style.background = '#e53e3e';
-      etiquette.textContent = '✗ Erreur';
-      alert('Erreur lors du téléchargement : ' + e.message);
+      enveloppe.classList.add('echec');
+      etiquette.textContent = '✗ Échec';
+      boiteErreur.textContent = 'Erreur lors du téléchargement : ' + e.message;
+      boiteErreur.hidden = false;
     } finally {
-      btn.classList.remove('loading');
-      btn.disabled = false;
-      btn.querySelector('.btn-label').textContent =
-        '⬇ TÉLÉCHARGER ' + preset.toUpperCase();
+      bouton.classList.remove('charge');
+      bouton.disabled = false;
     }
+  }
+
+  // ── Liste des qualités ───────────────────────────────────────────────────
+  function decrireProfil(profil, mime) {
+    const p = profil.toLowerCase(), m = mime.toLowerCase();
+    let format = 'Audio';
+    if (p.includes('opus') || m.includes('opus') || m.includes('ogg')) format = 'Opus';
+    else if (p.includes('mp3') || m.includes('mpeg'))                   format = 'MP3';
+    else if (p.includes('aac') || m.includes('mp4') || m.includes('aac')) format = 'AAC';
+    const debit = p.match(/(\d+)k/);
+    return { format, debit: debit ? debit[1] + '\u00A0kbit/s' : null };
+  }
+
+  function construireLigneQualite(v, s, titre) {
+    const profil    = s.preset   || '?';
+    const mime      = s.mime     || '?';
+    const protocole = s.protocol || '?';
+    const qualite   = s.quality  || '?';
+    const { format, debit } = decrireProfil(profil, mime);
+    const estChiffre = protocole.includes('encrypted');
+    const libelleQualite = qualite === 'hq' ? 'Haute qualité' : qualite === 'sq' ? 'Standard' : qualite;
+
+    const ligne = document.createElement('div');
+    ligne.className = 'ligne-qualite';
+    ligne.innerHTML = `
+      <div class="format-pastille">${echapper(format)}</div>
+      <div>
+        <div class="qualite-titre">${echapper(format)}${debit ? ' · ' + debit : ''}</div>
+        <div class="qualite-detail">${echapper(profil)} · ${echapper(mime)} · ${echapper(protocole).toUpperCase()}</div>
+        <div class="puces">
+          <span class="puce ${qualite === 'hq' ? 'puce-rouge' : ''}">${echapper(libelleQualite)}</span>
+          <span class="puce ${estChiffre ? 'puce-rouge' : 'puce-verte'}">${estChiffre ? 'Chiffré' : 'Ouvert'}</span>
+        </div>
+      </div>
+      <button type="button" class="bouton bouton-contour bouton-telecharger">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="bouton-libelle">${icone('telecharger', 16)}Télécharger</span>
+      </button>
+      <div class="progression-telechargement" hidden>
+        <div class="progression-fond"><div class="progression-barre"></div></div>
+        <span class="progression-etiquette">0\u00A0%</span>
+      </div>
+      <p class="qualite-erreur" hidden></p>`;
+
+    // Attacher le handler avec l'URL M3U8 déjà résolue
+    ligne.querySelector('.bouton-telecharger').addEventListener('click', function () {
+      demarrerTelechargement(this, v.url, v.licenseAuthToken, profil, titre);
+    });
+    return ligne;
+  }
+
+  async function chargerQualites() {
+    const liste = parId('liste-qualites');
+    const { flux, idClient, authPiste, titre } = _fluxEnAttente;
+
+    // Préparer le tableau index+url pour le proxy
+    const donnees = flux.map((s, i) => ({ index: i, url: s.url }));
+
+    try {
+      const reponse = await fetch(
+        './sc.php?action=check_streams'
+        + '&client_id='           + encodeURIComponent(idClient)
+        + '&track_authorization=' + encodeURIComponent(authPiste)
+        + '&streams='             + encodeURIComponent(JSON.stringify(donnees))
+      );
+      const resultat = await reponse.json();
+
+      parId('chargement-qualites')?.remove();
+
+      if (!resultat.success || !resultat.valid.length) {
+        liste.innerHTML = '<p class="qualite-erreur">Aucune qualité disponible pour ce titre.</p>';
+        return;
+      }
+      resultat.valid.forEach(v => liste.appendChild(construireLigneQualite(v, flux[v.index], titre)));
+
+    } catch (e) {
+      liste.innerHTML = `<p class="qualite-erreur">Erreur : ${echapper(e.message)}</p>`;
+    }
+  }
+
+  const libelleBascule = ouvert => ouvert
+    ? icone('haut') + 'Masquer les qualités'
+    : icone('telecharger') + 'Télécharger l’audio';
+
+  function initialiserTelechargement() {
+    const boutonBascule = parId('bouton-bascule');
+    const panneau       = parId('panneau-qualites');
+    if (!boutonBascule || !panneau) return;
+    let fluxVerifie = false;
+
+    boutonBascule.addEventListener('click', async () => {
+      const estOuvert = panneau.classList.toggle('ouvert');
+      boutonBascule.setAttribute('aria-expanded', estOuvert);
+      boutonBascule.innerHTML = libelleBascule(estOuvert);
+      if (estOuvert && !fluxVerifie && _fluxEnAttente) {
+        fluxVerifie = true;
+        await chargerQualites();
+      }
+    });
   }
 
   // ── Rendu des résultats ──────────────────────────────────────────────────
-  function afficherResultats(d) {
-    const zone = parId('results');
-    zone.classList.remove('hidden');
-    zone.classList.add('fade-in');
+  function htmlPiste(d) {
+    const piste   = d.track;
+    const artiste = d.artist;
 
-    let html = '';
+    const pochette = piste.artwork_url
+      ? `<img class="pochette" src="${echapper(piste.artwork_url.replace('-large', '-t500x500'))}" alt="Pochette de ${echapper(piste.title)}" />`
+      : `<div class="pochette pochette-vide">${icone('note', 56)}</div>`;
 
-    // ══ Artiste ═════════════════════════════════════════════════════════════
-    if (d.artist) {
-      const artiste = d.artist;
-      const banniere = artiste.banner_url
-        ? `<img id="banner-img" src="${echapper(artiste.banner_url)}" alt="bannière" class="mb-4" />`
-        : '';
-      const avatar = artiste.avatar_url
-        ? `<img id="avatar-img" src="${echapper(artiste.avatar_url)}" alt="avatar" />`
-        : `<div style="width:56px;height:56px;border-radius:50%;background:#222;border:2px solid var(--sc-orange)"></div>`;
-      const verifie = artiste.verified
-        ? `<span class="point-verifie" title="Vérifié"></span> <span style="color:var(--sc-orange);font-size:.7rem">VÉRIFIÉ</span>`
-        : '';
+    const nomArtiste = artiste && (artiste.full_name || artiste.username);
+    const signature = nomArtiste
+      ? `<p class="piste-artiste">${artiste.avatar_url ? `<img class="avatar avatar-mini" src="${echapper(artiste.avatar_url.replace('-large', '-t200x200'))}" alt="" />` : ''}<span>${echapper(nomArtiste)}</span></p>`
+      : '';
 
-      let htmlBadges = '';
-      if (artiste.badges) {
-        const listeBadges = [];
-        if (artiste.badges.pro)              listeBadges.push('PRO');
-        if (artiste.badges.pro_unlimited)    listeBadges.push('PRO UNLIMITED');
-        if (artiste.badges.creator_mid_tier) listeBadges.push('CREATOR');
-        if (artiste.badges.verified)         listeBadges.push('VERIFIED');
-        if (listeBadges.length) {
-          htmlBadges = `<div class="flex gap-2 mt-2 flex-wrap">` +
-            listeBadges.map(b => `<span class="badge orange">${echapper(b)}</span>`).join('') +
-            `</div>`;
-        }
-      }
+    const puces = [piste.genre, piste.duration_human].filter(Boolean)
+      .map(t => `<span class="puce">${echapper(t)}</span>`).join('');
 
-      html += `<div class="carte">
-        ${banniere}
-        <div class="carte-titre">🎤 Artiste</div>
-        <div class="flex gap-4 items-center mb-5">
-          ${avatar}
-          <div>
-            <div class="syne font-extrabold text-lg">${echapper(artiste.full_name || artiste.username)}</div>
-            <div class="text-xs" style="color:var(--sc-attenue)">@${echapper(artiste.username)}</div>
-            <div class="flex gap-2 mt-1 items-center">${verifie}</div>
-            ${htmlBadges}
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4" style="background:#0d0d0d;border:1px solid var(--sc-bordure)">
-          <div class="bloc-stat">
-            <span class="etiquette-stat">Abonnés</span>
-            <span class="valeur-stat grande" style="color:var(--sc-orange)">${formater(artiste.followers_count)}</span>
-          </div>
-          <div class="bloc-stat">
-            <span class="etiquette-stat">Abonnements</span>
-            <span class="valeur-stat">${formater(artiste.followings_count)}</span>
-          </div>
-          <div class="bloc-stat">
-            <span class="etiquette-stat">Titres</span>
-            <span class="valeur-stat">${formater(artiste.track_count)}</span>
-          </div>
-          <div class="bloc-stat">
-            <span class="etiquette-stat">Playlists</span>
-            <span class="valeur-stat">${formater(artiste.playlist_count)}</span>
-          </div>
-          <div class="bloc-stat">
-            <span class="etiquette-stat">Likes</span>
-            <span class="valeur-stat">${formater(artiste.likes_count)}</span>
-          </div>
-          <div class="bloc-stat">
-            <span class="etiquette-stat">Reposts</span>
-            <span class="valeur-stat">${formater(artiste.reposts_count)}</span>
-          </div>
-          <div class="bloc-stat">
-            <span class="etiquette-stat">Commentaires</span>
-            <span class="valeur-stat">${formater(artiste.comments_count)}</span>
-          </div>
-          <div class="bloc-stat">
-            <span class="etiquette-stat">Abonnement</span>
-            <span class="valeur-stat text-sm">${echapper(artiste.subscription || '—')}</span>
-          </div>
-        </div>
-
-        ${ligneKv('Profil URL', artiste.permalink_url, true)}
-        ${ligneKv('Permalink', artiste.permalink)}
-        ${ligneKv('Ville', artiste.city)}
-        ${ligneKv('Pays', artiste.country_code)}
-        ${ligneKv('Description', artiste.description)}
-      </div>`;
+    const peutTelecharger = piste.audio_streams && piste.audio_streams.length && d.api_client;
+    if (peutTelecharger) {
+      _fluxEnAttente = {
+        flux:      piste.audio_streams,
+        idClient:  d.api_client.id,
+        authPiste: piste.track_authorization,
+        titre:     piste.title || 'track',
+      };
     }
 
-    // ══ Track ════════════════════════════════════════════════════════════════
-    if (d.track) {
-      const piste = d.track;
-      const pochette = piste.artwork_url
-        ? `<img id="artwork-img" src="${echapper(piste.artwork_url.replace('-large','-t500x500'))}" alt="pochette" />`
-        : `<div style="aspect-ratio:1;background:#161616;display:flex;align-items:center;justify-content:center;color:#333;font-size:2rem">♫</div>`;
+    const boutonTelecharger = peutTelecharger
+      ? `<button type="button" class="bouton bouton-primaire" id="bouton-bascule" aria-expanded="false" aria-controls="panneau-qualites">${libelleBascule(false)}</button>`
+      : '';
+    const lienSoundcloud = estUrlHttp(piste.permalink_url)
+      ? `<a class="bouton bouton-secondaire" href="${echapper(piste.permalink_url)}" target="_blank" rel="noopener">Ouvrir sur SoundCloud ${icone('externe', 16)}</a>`
+      : '';
+    const panneau = peutTelecharger
+      ? `<div class="qualites" id="panneau-qualites"><div class="qualites-interieur"><div class="liste-qualites" id="liste-qualites">
+           <div class="qualite-chargement" id="chargement-qualites"><span class="spinner"></span>Vérification des qualités disponibles…</div>
+         </div></div></div>`
+      : '';
 
-      html += `<div class="carte">
-        <div class="carte-titre">🎵 Titre</div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div class="md:col-span-1">
-            ${pochette}
-          </div>
-          <div class="md:col-span-2 flex flex-col justify-between gap-4">
-            <div>
-              <div class="syne font-extrabold text-xl leading-tight mb-1">${echapper(piste.title)}</div>
-              <div class="text-xs mb-3" style="color:var(--sc-attenue)">${echapper(piste.genre || 'Genre inconnu')}</div>
-              ${piste.description ? `<p class="text-xs leading-relaxed" style="color:#888">${echapper(piste.description).substring(0,400)}${piste.description.length > 400 ? '…' : ''}</p>` : ''}
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="bloc-stat">
-                <span class="etiquette-stat">Durée</span>
-                <span class="valeur-stat" style="color:var(--sc-orange)">${echapper(piste.duration_human)}</span>
-              </div>
-              <div class="bloc-stat">
-                <span class="etiquette-stat">Écoutes</span>
-                <span class="valeur-stat">${formater(piste.playback_count)}</span>
-              </div>
-              <div class="bloc-stat">
-                <span class="etiquette-stat">Likes</span>
-                <span class="valeur-stat">${formater(piste.likes_count)}</span>
-              </div>
-              <div class="bloc-stat">
-                <span class="etiquette-stat">Reposts</span>
-                <span class="valeur-stat">${formater(piste.reposts_count)}</span>
-              </div>
-              <div class="bloc-stat">
-                <span class="etiquette-stat">Commentaires</span>
-                <span class="valeur-stat">${formater(piste.comment_count)}</span>
-              </div>
-              <div class="bloc-stat">
-                <span class="etiquette-stat">Téléchargements</span>
-                <span class="valeur-stat">${formater(piste.download_count)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        ${ligneKv('Permalink URL', piste.permalink_url, true)}
-        ${ligneKv('Date de sortie', piste.release_date)}
+    return `<section class="piste">
+      <div>${pochette}</div>
+      <div>
+        ${signature}
+        <h2 class="piste-titre">${echapper(piste.title)}</h2>
+        <div class="puces">${puces}</div>
+        <dl class="stats-piste">
+          ${htmlStat('Écoutes', formater(piste.playback_count))}
+          ${htmlStat('Likes', formater(piste.likes_count))}
+          ${htmlStat('Reposts', formater(piste.reposts_count))}
+          ${htmlStat('Commentaires', formater(piste.comment_count))}
+          ${htmlStat('Téléchargements', formater(piste.download_count))}
+        </dl>
+        ${piste.description ? `<p class="piste-description">${echapper(couper(piste.description, 400))}</p>` : ''}
+        <div class="piste-actions">${boutonTelecharger}${lienSoundcloud}</div>
+        ${panneau}
+      </div>
+      <dl class="details piste-details">
+        ${ligneKv('Adresse', piste.permalink_url, true)}
+        ${ligneKv('Mis en ligne le', piste.created_at && formaterDate(piste.created_at))}
+        ${ligneKv('Date de sortie', piste.release_date && formaterDate(piste.release_date))}
         ${ligneKv('Label', piste.label_name)}
         ${ligneKv('Durée (ms)', piste.duration_ms)}
-      </div>`;
+      </dl>
+    </section>`;
+  }
 
-      // ── Métadonnées éditeur ───────────────────────────────────────────────
-      if (piste.publisher) {
-        const editeur = piste.publisher;
-        html += `<div class="carte">
-          <div class="carte-titre">📀 Métadonnées Éditeur</div>
-          ${ligneKv('Artiste', editeur.artist)}
-          ${ligneKv('Album', editeur.album_title)}
-          ${ligneKv('Titre release', editeur.release_title)}
-          ${ligneKv('ISRC', editeur.isrc, false, true)}
-          ${ligneKv('UPC / EAN', editeur.upc_or_ean, false, true)}
-          ${ligneKv('Ligne P', editeur.p_line)}
-          ${ligneKv('Ligne C', editeur.c_line)}
-        </div>`;
-      }
+  function htmlArtiste(artiste) {
+    const banniere = artiste.banner_url ? `<img class="banniere" src="${echapper(artiste.banner_url)}" alt="" />` : '';
+    const avatar = artiste.avatar_url
+      ? `<img class="avatar" src="${echapper(artiste.avatar_url.replace('-large', '-t200x200'))}" alt="" />`
+      : `<span class="avatar"></span>`;
+    const estVerifie = artiste.verified || (artiste.badges && artiste.badges.verified);
 
-      // ── Flux audio → Bouton téléchargement ───────────────────────────────
-      if (piste.audio_streams && piste.audio_streams.length && d.api_client) {
-        const idClient  = d.api_client.id;
-        const authPiste = piste.track_authorization;
-        const titre     = piste.title || 'track';
+    const etiquettes = [];
+    if (artiste.badges) {
+      if (artiste.badges.pro)              etiquettes.push('Pro');
+      if (artiste.badges.pro_unlimited)    etiquettes.push('Pro Unlimited');
+      if (artiste.badges.creator_mid_tier) etiquettes.push('Créateur');
+    }
+    const htmlEtiquettes = etiquettes.length
+      ? `<div class="puces">${etiquettes.map(b => `<span class="puce">${echapper(b)}</span>`).join('')}</div>`
+      : '';
 
-        html += `<div class="carte" id="audio-card">
-          <div class="carte-titre">🔊 Audio</div>
-          <button class="btn-dl" id="toggle-dl-btn">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-            TÉLÉCHARGER
-          </button>
-          <div class="liste-qualites" id="quality-list">
-            <div id="quality-loading" class="text-xs p-4" style="color:var(--sc-attenue)">
-              <span class="spinner" style="width:12px;height:12px;border-width:1.5px;display:inline-block;vertical-align:middle;margin-right:6px"></span>
-              Vérification des qualités disponibles…
-            </div>
+    return `<section class="rubrique">
+      <h2 class="rubrique-titre">Artiste</h2>
+      <div>
+        ${banniere}
+        <div class="artiste-entete">
+          ${avatar}
+          <div>
+            <div class="artiste-nom">${echapper(artiste.full_name || artiste.username)}${estVerifie ? ICONE_VERIFIE : ''}</div>
+            <div class="artiste-pseudo">@${echapper(artiste.username)}</div>
           </div>
-        </div>`;
+          ${htmlEtiquettes}
+        </div>
+        <dl class="stats-artiste">
+          ${htmlStat('Abonnés', formater(artiste.followers_count))}
+          ${htmlStat('Abonnements', formater(artiste.followings_count))}
+          ${htmlStat('Titres', formater(artiste.track_count))}
+          ${htmlStat('Playlists', formater(artiste.playlist_count))}
+          ${htmlStat('Likes', formater(artiste.likes_count))}
+          ${htmlStat('Reposts', formater(artiste.reposts_count))}
+          ${htmlStat('Commentaires', formater(artiste.comments_count))}
+          ${htmlStat('Offre', echapper(artiste.subscription || '—'))}
+        </dl>
+        <dl class="details">
+          ${ligneKv('Profil', artiste.permalink_url, true)}
+          ${ligneKv('Permalink', artiste.permalink)}
+          ${ligneKv('Ville', artiste.city)}
+          ${ligneKv('Pays', artiste.country_code)}
+          ${ligneKv('Description', artiste.description)}
+        </dl>
+      </div>
+    </section>`;
+  }
 
-        // Stocker les infos pour la vérification différée
-        window._fluxEnAttente = {
-          flux:      piste.audio_streams,
-          idClient,
-          authPiste,
-          titre,
-        };
-      }
-    }
+  function htmlEditeur(editeur) {
+    return `<section class="rubrique">
+      <h2 class="rubrique-titre">Éditeur</h2>
+      <dl class="details">
+        ${ligneKv('Artiste', editeur.artist)}
+        ${ligneKv('Album', editeur.album_title)}
+        ${ligneKv('Titre de la sortie', editeur.release_title)}
+        ${ligneKv('ISRC', editeur.isrc, false, true)}
+        ${ligneKv('UPC / EAN', editeur.upc_or_ean, false, true)}
+        ${ligneKv('Ligne P', editeur.p_line)}
+        ${ligneKv('Ligne C', editeur.c_line)}
+      </dl>
+    </section>`;
+  }
 
-    // ══ Repli ════════════════════════════════════════════════════════════════
-    if (!d.artist && !d.track && !d.api_client) {
-      html += `<div class="carte">
-        <div class="carte-titre">⚠️ Données brutes</div>
-        <p class="text-sm" style="color:var(--sc-attenue)">Aucune donnée structurée trouvée.</p>
-      </div>`;
-    }
+  function afficherResultats(d) {
+    const zone = parId('resultats');
+    _fluxEnAttente = null;
+
+    let html = '';
+    if (d.track)                      html += htmlPiste(d);
+    if (d.artist)                     html += htmlArtiste(d.artist);
+    if (d.track && d.track.publisher) html += htmlEditeur(d.track.publisher);
+    if (!html) html = '<div class="vide">Aucune donnée structurée trouvée pour cette adresse.</div>';
 
     zone.innerHTML = html;
-
-    // ── Boutons copier ────────────────────────────────────────────────────
-    zone.querySelectorAll('.btn-copier').forEach(btn => {
-      btn.addEventListener('click', () => {
-        navigator.clipboard.writeText(btn.dataset.copy || '').then(() => {
-          const original = btn.textContent;
-          btn.textContent = 'COPIÉ !';
-          btn.style.borderColor = 'var(--sc-orange)';
-          btn.style.color = 'var(--sc-orange)';
-          setTimeout(() => {
-            btn.textContent = original;
-            btn.style.borderColor = '';
-            btn.style.color = '';
-          }, 1500);
-        });
-      });
-    });
-
-    // ── Basculer la liste de qualités (vérification au 1er clic) ─────────
-    const btnBascule  = document.getElementById('toggle-dl-btn');
-    const listeQual   = document.getElementById('quality-list');
-    let   fluxVerifie = false;
-
-    if (btnBascule && listeQual) {
-      btnBascule.addEventListener('click', async () => {
-        listeQual.classList.toggle('open');
-        const estOuvert = listeQual.classList.contains('open');
-        btnBascule.innerHTML = estOuvert
-          ? '▲ MASQUER'
-          : '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg> TÉLÉCHARGER';
-
-        if (estOuvert && !fluxVerifie && window._fluxEnAttente) {
-          fluxVerifie = true;
-          const { flux, idClient, authPiste, titre } = window._fluxEnAttente;
-
-          // Préparer le tableau index+url pour le proxy
-          const donnees = flux.map((s, i) => ({ index: i, url: s.url }));
-
-          try {
-            const reponse = await fetch(
-              './sc.php?action=check_streams'
-              + '&client_id='           + encodeURIComponent(idClient)
-              + '&track_authorization=' + encodeURIComponent(authPiste)
-              + '&streams='             + encodeURIComponent(JSON.stringify(donnees))
-            );
-            const resultat = await reponse.json();
-
-            const chargementEl = document.getElementById('quality-loading');
-            if (chargementEl) chargementEl.remove();
-
-            if (!resultat.success || !resultat.valid.length) {
-              listeQual.innerHTML = '<div class="text-xs p-4" style="color:#fc8181">Aucune qualité disponible.</div>';
-              return;
-            }
-
-            resultat.valid.forEach(v => {
-              const s      = flux[v.index];
-              const preset = s.preset   || '?';
-              const mime   = s.mime     || '?';
-              const proto  = s.protocol || '?';
-              const qual   = s.quality  || '?';
-              const estChiffre = proto.includes('encrypted');
-              const badgeChiffre = estChiffre
-                ? `<span class="badge" style="border-color:#e53e3e;color:#e53e3e;font-size:.6rem">🔒 CHIFFRÉ</span>`
-                : `<span class="badge vert" style="font-size:.6rem">🔓 OUVERT</span>`;
-              const badgeQual = `<span class="badge ${qual === 'hq' ? 'orange' : ''}" style="font-size:.6rem">${qual.toUpperCase()}</span>`;
-
-              const ligne = document.createElement('div');
-              ligne.className = 'quality-row';
-              ligne.innerHTML = `
-                <div class="quality-row-info">
-                  <div>
-                    <div class="text-xs font-bold" style="color:var(--sc-texte)">${echapper(preset)}</div>
-                    <div class="text-xs" style="color:var(--sc-attenue)">${echapper(mime)} · ${echapper(proto).toUpperCase()}</div>
-                  </div>
-                  <div class="flex gap-2">${badgeQual}${badgeChiffre}</div>
-                </div>
-                <button class="dl-quality-btn" data-preset="${echapper(preset)}" data-title="${echapper(titre)}">
-                  <span class="btn-spinner"></span>
-                  <span class="btn-label">
-                    <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor" style="display:inline;vertical-align:middle;margin-right:3px"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-                    TÉLÉCHARGER ${echapper(preset).toUpperCase()}
-                  </span>
-                </button>`;
-
-              // Attacher le handler avec l'URL M3U8 déjà résolue
-              ligne.querySelector('.dl-quality-btn').addEventListener('click', function() {
-                demarrerTelechargement(this, v.url, v.licenseAuthToken, preset, titre);
-              });
-
-              listeQual.appendChild(ligne);
-            });
-
-          } catch (e) {
-            listeQual.innerHTML = `<div class="text-xs p-4" style="color:#fc8181">Erreur : ${echapper(e.message)}</div>`;
-          }
-        }
-      });
-    }
+    zone.hidden = false;
+    parId('page').classList.add('a-des-resultats');
+    initialiserTelechargement();
   }
 
   // ── Événements ────────────────────────────────────────────────────────────
-  parId('launch-btn').addEventListener('click', lancer);
-  parId('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') lancer(); });
+  parId('formulaire').addEventListener('submit', e => { e.preventDefault(); lancer(); });
+
+  parId('resultats').addEventListener('click', async e => {
+    const bouton = e.target.closest('.bouton-copier');
+    if (!bouton) return;
+    try { await navigator.clipboard.writeText(bouton.dataset.copie || ''); } catch (_) { return; }
+    const libelle  = bouton.querySelector('span');
+    const original = libelle.textContent;
+    bouton.classList.add('copie');
+    libelle.textContent = 'Copié';
+    setTimeout(() => { bouton.classList.remove('copie'); libelle.textContent = original; }, 1500);
+  });
+
+  let minuteurRedimensionnement = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(minuteurRedimensionnement);
+    minuteurRedimensionnement = setTimeout(genererOndes, 150);
+  });
+
+  genererOndes();
   </script>
 </body>
 </html>

@@ -160,18 +160,38 @@
     .suggestion svg { flex: none; color: #9a9aa6; }
     .suggestion.actif { background: var(--voile); }
     .suggestion-saisie { color: var(--encre-douce); }
-    .liste-pistes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; margin: 1.25rem 0 0; padding: 0; list-style: none; }
-    .piste-resultat { display: flex; align-items: center; gap: .9rem; width: 100%; padding: .7rem; background: #fff; border: 1px solid var(--trait); border-radius: var(--rayon-moyen); color: inherit; text-align: left; cursor: pointer; transition: border-color .15s, background-color .15s; }
-    .piste-resultat:hover { border-color: var(--rouge); background: var(--voile); }
-    .piste-resultat:focus-visible { outline: 3px solid rgba(225, 29, 46, .4); outline-offset: 2px; }
-    .miniature { flex: none; width: 56px; height: 56px; object-fit: cover; background: #ececf1; border-radius: 10px; }
-    .miniature-vide { display: grid; place-items: center; color: #c3c3cc; }
-    .piste-resultat-texte { display: grid; flex: 1; min-width: 0; }
-    .piste-resultat-titre { overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
-    .piste-resultat-infos { display: flex; gap: .9rem; overflow: hidden; color: var(--encre-douce); font-size: .85rem; white-space: nowrap; }
-    .piste-resultat-artiste { overflow: hidden; text-overflow: ellipsis; }
-    .piste-resultat-action { flex: none; padding: .25rem .8rem; border: 1.5px solid var(--rouge); border-radius: 999px; color: var(--rouge); font-size: .85rem; font-weight: 700; transition: background-color .15s, color .15s; }
-    .piste-resultat:hover .piste-resultat-action { background: var(--rouge); color: #fff; }
+    /* Cartes de résultats */
+    .liste-pistes { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 232px), 1fr)); gap: 1.1rem; margin: 1.5rem 0 0; padding: 0; list-style: none; }
+    .carte-piste { display: flex; flex-direction: column; gap: .9rem; height: 100%; padding: .65rem .65rem .8rem; background: #fff; border: 1px solid var(--trait); border-radius: 22px; transition: border-color .2s, box-shadow .25s; }
+    .carte-piste:hover { border-color: var(--rouge-bord); box-shadow: 0 22px 36px -26px rgba(225, 29, 46, .5), 0 6px 14px -10px rgba(28, 28, 33, .16); }
+    .carte-piste.en-ecoute { border-color: var(--rouge); box-shadow: 0 0 0 3px rgba(225, 29, 46, .14), 0 22px 36px -26px rgba(225, 29, 46, .55); }
+
+    .carte-pochette { position: relative; isolation: isolate; aspect-ratio: 1; overflow: hidden; background: #ececf1; border-radius: 16px; cursor: pointer; }
+    .carte-pochette img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--courbe); }
+    .carte-piste:hover .carte-pochette img { transform: scale(1.04); }
+    .carte-pochette-vide { display: grid; place-items: center; width: 100%; height: 100%; color: #c3c3cc; }
+    .carte-duree { position: absolute; right: .5rem; bottom: .5rem; z-index: 2; padding: .1rem .6rem; background: rgba(255, 255, 255, .92); border-radius: 999px; font: 700 .78rem/1.55 var(--police-titre); font-variant-numeric: tabular-nums; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+    .carte-lecture { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; background: rgba(28, 28, 33, .3); opacity: 0; transition: opacity .2s; pointer-events: none; }
+    .carte-lecture-rond { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--rouge); color: #fff; box-shadow: 0 14px 26px -10px rgba(225, 29, 46, .85); transform: scale(.82); transition: transform .3s var(--courbe); }
+    .carte-pochette:hover .carte-lecture, .carte-piste.en-ecoute .carte-lecture { opacity: 1; }
+    .carte-pochette:hover .carte-lecture-rond, .carte-piste.en-ecoute .carte-lecture-rond { transform: none; }
+    .carte-egaliseur { display: none; align-items: flex-end; gap: 3px; height: 20px; }
+    .carte-egaliseur i { width: 3.5px; height: 100%; border-radius: 2px; background: #fff; transform: scaleY(.3); transform-origin: bottom; animation: egaliseur .9s ease-in-out infinite; }
+    .carte-egaliseur i:nth-child(2) { animation-duration: .65s; animation-delay: -.25s; }
+    .carte-egaliseur i:nth-child(3) { animation-duration: 1.05s; animation-delay: -.5s; }
+    .carte-egaliseur i:nth-child(4) { animation-duration: .75s; animation-delay: -.1s; }
+    .carte-piste.en-lecture .carte-egaliseur { display: inline-flex; }
+    .carte-piste.en-lecture .carte-lecture-rond svg { display: none; }
+
+    .carte-texte { display: grid; gap: .15rem; min-width: 0; padding-inline: .35rem; }
+    .carte-titre { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; min-height: 2.6em; margin: 0; overflow: hidden; font: 700 1.02rem/1.3 var(--police-titre); letter-spacing: -.01em; overflow-wrap: anywhere; }
+    .carte-artiste { margin: 0; overflow: hidden; color: var(--encre-douce); font-size: .9rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+    .carte-meta { margin: .2rem 0 0; color: #8a8a97; font-size: .82rem; font-variant-numeric: tabular-nums; }
+    .carte-actions { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin-top: auto; }
+    .carte-actions .bouton { min-width: 0; padding: .62rem .4rem; font-size: .9rem; }
+    .carte-piste.en-lecture .bouton-ecouter { background: var(--rouge-pale); color: var(--rouge-fonce); }
+    .carte-piste.en-lecture .bouton-ecouter:hover:not(:disabled) { background: #fbd9dc; color: var(--rouge-fonce); }
+
     .recherche-pied { display: flex; justify-content: center; margin-top: 1.5rem; }
     .bouton-retour { justify-self: start; margin-bottom: -1.5rem; padding: .45rem 1rem .45rem .7rem; background: #fff; border: 1.5px solid var(--trait-fort); color: var(--encre); font-size: .9rem; }
     .bouton-retour:hover { border-color: var(--encre); }
@@ -255,13 +275,61 @@
       .lecteur-volume { display: none; }
     }
 
+    /* ── Lecteur ancré en bas de page ── */
+    .lecteur.lecteur-dock {
+      position: fixed; inset: auto 0 max(.75rem, env(safe-area-inset-bottom)); z-index: 40;
+      width: min(1040px, 100% - 1.5rem); margin-inline: auto; grid-column: auto;
+      grid-template-columns: minmax(0, 1.15fr) auto minmax(5.5rem, auto) auto auto;
+      grid-template-areas: "info transport temps outils fermer" "onde onde onde onde onde";
+      gap: .9rem 1.1rem; padding: .85rem 1rem 1rem; border-radius: 26px;
+      box-shadow: 0 -1px 0 rgba(28, 28, 33, .03), 0 30px 60px -20px rgba(225, 29, 46, .4), 0 18px 36px -18px rgba(28, 28, 33, .3);
+      animation: dock-entree .5s var(--courbe) both;
+    }
+    @keyframes dock-entree { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+    .dock-info { grid-area: info; display: flex; align-items: center; gap: .8rem; min-width: 0; }
+    .dock-pochette { flex: none; width: 56px; height: 56px; object-fit: cover; background: #ececf1; border-radius: 14px; box-shadow: 0 10px 20px -10px rgba(28, 28, 33, .5); }
+    .dock-pochette-vide { display: grid; place-items: center; color: #c3c3cc; }
+    .dock-texte { min-width: 0; }
+    .dock-titre, .dock-artiste { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dock-titre { font: 700 1rem/1.3 var(--police-titre); letter-spacing: -.01em; }
+    .dock-artiste { color: var(--encre-douce); font-size: .88rem; }
+    .dock-transport { grid-area: transport; display: flex; align-items: center; gap: .6rem; }
+    .lecteur-dock .lecteur-bouton { width: 52px; height: 52px; }
+    .lecteur-dock .lecteur-temps { grid-area: temps; }
+    .lecteur-dock .lecteur-temps-courant { font-size: 1.3rem; }
+    .lecteur-dock .lecteur-temps-total { font-size: .9rem; }
+    .lecteur-dock .lecteur-outils { grid-area: outils; }
+    .lecteur-dock .dock-fermer { grid-area: fermer; }
+    .lecteur-dock .lecteur-bas { grid-area: onde; }
+    .lecteur-dock .lecteur-onde { height: 88px; }
+
+    .notification { position: fixed; inset: 1rem 0 auto; z-index: 60; display: flex; align-items: center; gap: .6rem; width: fit-content; max-width: min(92vw, 440px); margin-inline: auto; padding: .75rem 1.1rem; background: #fff; border: 1px solid var(--rouge-bord); border-radius: 14px; color: #8f1019; font-weight: 600; box-shadow: 0 18px 36px -18px rgba(28, 28, 33, .35); animation: apparition .3s var(--courbe) both; }
+    .notification svg { flex: none; }
+    body.avec-dock .page { padding-bottom: 15rem; }
+
     @media (max-width: 860px) {
-      .liste-pistes { grid-template-columns: 1fr; }
+      .lecteur.lecteur-dock { grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "info transport fermer" "onde onde onde" "temps outils outils"; gap: .8rem; padding: .75rem .85rem .85rem; border-radius: 22px; }
+      .lecteur-dock .lecteur-outils { justify-content: flex-end; }
+      .lecteur-dock .lecteur-onde { height: 68px; }
+    }
+    @media (max-width: 560px) {
+      .dock-transport .lecteur-outil { display: none; }
+      .dock-pochette { width: 46px; height: 46px; border-radius: 12px; }
+      .liste-pistes { grid-template-columns: 1fr; gap: .75rem; }
+      .carte-piste { display: grid; grid-template-columns: 92px minmax(0, 1fr); grid-template-areas: "pochette texte" "actions actions"; align-items: center; gap: .65rem .9rem; }
+      .carte-pochette { grid-area: pochette; border-radius: 14px; }
+      .carte-lecture-rond { width: 40px; height: 40px; }
+      .carte-duree { right: .35rem; bottom: .35rem; padding-inline: .45rem; font-size: .7rem; }
+      .carte-texte { grid-area: texte; padding-inline: 0; }
+      .carte-titre { min-height: 0; }
+      .carte-actions { grid-area: actions; }
+    }
+
+    @media (max-width: 860px) {
       .piste { grid-template-columns: 1fr; }
       .pochette { max-width: 320px; }
       .rubrique { grid-template-columns: 1fr; gap: 1rem; }
     }
-    @media (max-width: 480px) { .piste-resultat-action { display: none; } }
     @media (max-width: 640px) {
       .entete-note, .recherche-icone { display: none; }
       .recherche { padding-left: .6rem; }
@@ -324,6 +392,9 @@
     </main>
   </div>
 
+  <div class="notification" id="notification" role="status" hidden></div>
+  <section class="lecteur lecteur-dock" id="dock-lecteur" aria-label="Lecteur audio" hidden></section>
+
   <script>
   // ── Utilitaires ──────────────────────────────────────────────────────────
   const parId    = id => document.getElementById(id);
@@ -345,6 +416,9 @@
     note:        '<path d="M8 15V5l8-2v10"/><circle cx="6" cy="15" r="2.2"/><circle cx="14" cy="13" r="2.2"/>',
     loupe:       '<circle cx="9" cy="9" r="5.5"/><path d="M13.5 13.5L17 17"/>',
     gauche:      '<path d="M12 5l-5 5 5 5"/>',
+    lire:        '<path d="M6.5 4.5v11l9-5.5z" fill="currentColor"/>',
+    pause:       '<path d="M7 4.5v11M13 4.5v11" stroke-width="2.6"/>',
+    fermer:      '<path d="M5 5l10 10M15 5L5 15"/>',
   };
   const icone = (nom, taille = 18) =>
     `<svg width="${taille}" height="${taille}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CHEMINS_ICONES[nom]}</svg>`;
@@ -1498,12 +1572,172 @@
     detruireLecteur();
     const racine = document.querySelector('#resultats .lecteur');
     if (!racine || !d.track || !d.api_client) return;
+    fermerDock();   // un seul son à la fois
     _lecteurActif = new LecteurOnde(racine, {
       piste:     d.track,
       artiste:   d.artist,
       idClient:  d.api_client.id,
       authPiste: d.track.track_authorization,
     });
+  }
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // Lecteur ancré en bas de page : lecture directe depuis les cartes
+  // ═════════════════════════════════════════════════════════════════════════
+  let _lecteurDock          = null;   // instance de LecteurOnde du lecteur ancré
+  let _pisteDock            = null;   // { url } du titre chargé dans le lecteur ancré
+  let _chargementDock       = null;   // url du titre en cours de préparation
+  let _compteurDock         = 0;      // si plusieurs titres sont demandés, le dernier clic gagne
+  let _minuteurNotification = null;
+
+  function afficherNotification(texte) {
+    const zone = parId('notification');
+    zone.innerHTML = icone('alerte', 18) + '<span>' + echapper(texte) + '</span>';
+    zone.hidden = false;
+    clearTimeout(_minuteurNotification);
+    _minuteurNotification = setTimeout(() => { zone.hidden = true; }, 4500);
+  }
+
+  const nettoyerUrlPiste = url => {
+    try { const u = new URL(url); return u.origin + u.pathname; } catch (_) { return url; }
+  };
+
+  function htmlDock({ titre, artiste, pochette }) {
+    const image = pochette
+      ? `<img class="dock-pochette" src="${echapper(pochette)}" alt="" />`
+      : `<span class="dock-pochette dock-pochette-vide">${icone('note', 22)}</span>`;
+    return `
+      <div class="dock-info">
+        ${image}
+        <div class="dock-texte">
+          <p class="dock-titre" title="${echapper(titre)}">${echapper(titre)}</p>
+          <p class="dock-artiste">${echapper(artiste)}</p>
+        </div>
+      </div>
+      <div class="dock-transport">
+        <button type="button" class="lecteur-outil" data-role="reculer" aria-label="Reculer de ${SAUT_SECONDES} secondes">${ICONES_LECTEUR.reculer}</button>
+        <button type="button" class="lecteur-bouton" data-role="lecture" aria-label="Lire">
+          <span class="lecteur-bouton-halo" aria-hidden="true"></span>
+          ${ICONES_LECTEUR.lecture}${ICONES_LECTEUR.pause}
+          <span class="spinner spinner-blanc" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="lecteur-outil" data-role="avancer" aria-label="Avancer de ${SAUT_SECONDES} secondes">${ICONES_LECTEUR.avancer}</button>
+      </div>
+      <div class="lecteur-temps">
+        <span class="lecteur-temps-courant" data-role="temps-courant">0:00</span>
+        <span class="lecteur-temps-total">/ <span data-role="temps-total">0:00</span></span>
+        <span class="egaliseur" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      </div>
+      <div class="lecteur-outils">
+        <button type="button" class="lecteur-outil lecteur-vitesse" data-role="vitesse" aria-label="Vitesse de lecture : 1">1×</button>
+        <div class="lecteur-volume" data-role="zone-volume" data-niveau="haut">
+          <button type="button" class="lecteur-outil" data-role="muet" aria-label="Couper le son">${ICONES_LECTEUR.volHaut}${ICONES_LECTEUR.volBas}${ICONES_LECTEUR.volMuet}</button>
+          <input type="range" class="lecteur-curseur" data-role="volume" min="0" max="100" step="1" value="100" aria-label="Volume" />
+        </div>
+      </div>
+      <button type="button" class="lecteur-outil dock-fermer" data-role="fermer" aria-label="Fermer le lecteur">${icone('fermer', 18)}</button>
+      <div class="lecteur-bas">
+        <div class="lecteur-onde chargement" data-role="onde" tabindex="0" role="slider" aria-label="Position de lecture" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00" aria-busy="true">
+          <canvas></canvas>
+          <div class="lecteur-infobulle" data-role="infobulle" hidden>0:00</div>
+        </div>
+        <p class="lecteur-message" data-role="message" role="status" hidden></p>
+      </div>`;
+  }
+
+  /** Reflète l'état du lecteur ancré sur les cartes : titre en cours, lecture, chargement. */
+  function synchroniserCartes() {
+    const enLecture = !!(_lecteurDock && _lecteurDock.enLecture);
+    document.querySelectorAll('.carte-piste').forEach(carte => {
+      const courante = !!_pisteDock && _pisteDock.url === carte.dataset.url;
+      const charge   = _chargementDock === carte.dataset.url;
+      const joue     = courante && enLecture;
+      const bouton   = carte.querySelector('.bouton-ecouter');
+      const texte    = joue ? 'Pause' : courante ? 'Reprendre' : 'Écouter';
+      carte.classList.toggle('en-ecoute', courante);
+      carte.classList.toggle('en-lecture', joue);
+      bouton.classList.toggle('charge', charge);
+      bouton.disabled = charge;
+      bouton.setAttribute('aria-pressed', joue);
+      bouton.setAttribute('aria-label', texte + ' : ' + carte.querySelector('.carte-titre').textContent);
+      bouton.querySelector('.bouton-libelle').innerHTML = icone(joue ? 'pause' : 'lire', 16) + texte;
+    });
+  }
+
+  function detruireLecteurDock() {
+    const lecteur = _lecteurDock;
+    _lecteurDock = null;
+    _pisteDock = null;
+    if (lecteur) lecteur.detruire();
+  }
+
+  function fermerDock() {
+    detruireLecteurDock();
+    const dock = parId('dock-lecteur');
+    dock.hidden = true;
+    dock.innerHTML = '';
+    dock.classList.remove('en-lecture', 'attente');
+    document.body.classList.remove('avec-dock');
+    synchroniserCartes();
+  }
+
+  function ouvrirDock(d, pisteRecherche) {
+    detruireLecteurDock();
+    detruireLecteur();   // lecteur de la fiche détaillée : un seul son à la fois
+
+    const dock = parId('dock-lecteur');
+    const pochette = d.track.artwork_url || pisteRecherche.pochette;
+    dock.innerHTML = htmlDock({
+      titre:    d.track.title || pisteRecherche.titre,
+      artiste:  (d.artist && (d.artist.full_name || d.artist.username)) || pisteRecherche.artiste || '',
+      pochette: pochette ? pochette.replace('-large', '-t200x200') : null,
+    });
+    dock.classList.remove('en-lecture', 'attente');
+    dock.hidden = false;
+    document.body.classList.add('avec-dock');
+
+    _pisteDock   = { url: pisteRecherche.url };
+    _lecteurDock = new LecteurOnde(dock, {
+      piste:     d.track,
+      artiste:   d.artist,
+      idClient:  d.api_client.id,
+      authPiste: d.track.track_authorization,
+    });
+    ['play', 'pause', 'ended', 'emptied'].forEach(nom => _lecteurDock.audio.addEventListener(nom, synchroniserCartes));
+    dock.querySelector('[data-role="fermer"]').addEventListener('click', fermerDock);
+    synchroniserCartes();
+    _lecteurDock.lire();
+  }
+
+  async function ecouterPiste(indice) {
+    const piste = _rechercheActive && _rechercheActive.pistes[indice];
+    if (!piste) return;
+
+    // Même titre déjà dans le lecteur : simple bascule lecture / pause
+    if (_lecteurDock && _pisteDock && _pisteDock.url === piste.url) {
+      _lecteurDock.basculerLecture();
+      return;
+    }
+    if (_chargementDock === piste.url) return;
+
+    const jeton = ++_compteurDock;
+    _chargementDock = piste.url;
+    synchroniserCartes();
+    try {
+      const reponse  = await fetch('./sc.php?url=' + encodeURIComponent(nettoyerUrlPiste(piste.url)));
+      const resultat = await reponse.json();
+      if (jeton !== _compteurDock) return;
+      if (!resultat.success) throw new Error(resultat.error || 'Erreur inconnue du serveur');
+      const d = resultat.data;
+      if (!d.track || !d.api_client || !classerFlux(d.track.audio_streams).length) {
+        throw new Error('Ce titre ne peut pas être écouté directement. Utilisez « Analyser ».');
+      }
+      ouvrirDock(d, piste);
+    } catch (e) {
+      if (jeton === _compteurDock) afficherNotification(e.message);
+    } finally {
+      if (jeton === _compteurDock) { _chargementDock = null; synchroniserCartes(); }
+    }
   }
 
   // ── Rendu des résultats ──────────────────────────────────────────────────
@@ -1664,19 +1898,31 @@
   const TAILLE_PAGE = 12;
   let _rechercheActive = null;
 
-  function htmlLignePiste(piste, indice) {
-    const miniature = piste.pochette
-      ? `<img class="miniature" src="${echapper(piste.pochette.replace('-large', '-t200x200'))}" alt="" loading="lazy" />`
-      : `<span class="miniature miniature-vide">${icone('note', 22)}</span>`;
-    const ecoutes = piste.ecoutes != null ? `<span>${formater(piste.ecoutes)}\u00A0écoutes</span>` : '';
-    return `<li><button type="button" class="piste-resultat" data-indice="${indice}">
-      ${miniature}
-      <span class="piste-resultat-texte">
-        <span class="piste-resultat-titre">${echapper(piste.titre)}</span>
-        <span class="piste-resultat-infos"><span class="piste-resultat-artiste">${echapper(piste.artiste)}</span><span>${echapper(piste.duree)}</span>${ecoutes}</span>
-      </span>
-      <span class="piste-resultat-action">Analyser</span>
-    </button></li>`;
+  function htmlCartePiste(piste, indice) {
+    const pochette = piste.pochette
+      ? `<img src="${echapper(piste.pochette.replace('-large', '-t500x500'))}" alt="" loading="lazy" />`
+      : `<span class="carte-pochette-vide">${icone('note', 40)}</span>`;
+    const rondLecture = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="margin-left:2px"><path d="M8 5.5v13l11-6.5z"/></svg>';
+    const ecoutes = piste.ecoutes != null ? `<p class="carte-meta">${formater(piste.ecoutes)}\u00A0écoutes</p>` : '';
+    return `<li class="carte-piste" data-indice="${indice}" data-url="${echapper(piste.url)}">
+      <div class="carte-pochette">
+        ${pochette}
+        <span class="carte-lecture" aria-hidden="true"><span class="carte-lecture-rond">${rondLecture}<span class="carte-egaliseur"><i></i><i></i><i></i><i></i></span></span></span>
+        ${piste.duree ? `<span class="carte-duree">${echapper(piste.duree)}</span>` : ''}
+      </div>
+      <div class="carte-texte">
+        <h3 class="carte-titre">${echapper(piste.titre)}</h3>
+        <p class="carte-artiste">${echapper(piste.artiste)}</p>
+        ${ecoutes}
+      </div>
+      <div class="carte-actions">
+        <button type="button" class="bouton bouton-primaire bouton-analyser" aria-label="Analyser ${echapper(piste.titre)}">Analyser</button>
+        <button type="button" class="bouton bouton-contour bouton-ecouter" aria-pressed="false">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="bouton-libelle">${icone('lire', 16)}Écouter</span>
+        </button>
+      </div>
+    </li>`;
   }
 
   async function recupererPistes(requete, decalage) {
@@ -1693,12 +1939,13 @@
     zone.innerHTML = pistes.length
       ? `<div>
            <h2 class="rubrique-titre">Résultats pour «\u00A0${echapper(requete)}\u00A0»</h2>
-           <ul class="liste-pistes" id="liste-pistes">${pistes.map(htmlLignePiste).join('')}</ul>
+           <ul class="liste-pistes" id="liste-pistes">${pistes.map(htmlCartePiste).join('')}</ul>
            ${suivant ? '<div class="recherche-pied"><button type="button" class="bouton bouton-secondaire" id="bouton-plus">Afficher plus de titres</button></div>' : ''}
          </div>`
       : `<div class="vide">Aucun titre trouvé pour «\u00A0${echapper(requete)}\u00A0». Essayez une autre orthographe.</div>`;
     zone.hidden = false;
     parId('page').classList.add('a-des-resultats');
+    synchroniserCartes();
   }
 
   async function rechercherTitres(requete) {
@@ -1724,7 +1971,8 @@
       _rechercheActive.pistes.push(...resultat.pistes);
       _rechercheActive.decalage += TAILLE_PAGE;
       _rechercheActive.suivant = resultat.suivant;
-      parId('liste-pistes').insertAdjacentHTML('beforeend', resultat.pistes.map((p, i) => htmlLignePiste(p, depart + i)).join(''));
+      parId('liste-pistes').insertAdjacentHTML('beforeend', resultat.pistes.map((p, i) => htmlCartePiste(p, depart + i)).join(''));
+      synchroniserCartes();
       if (resultat.suivant) { bouton.disabled = false; bouton.textContent = 'Afficher plus de titres'; }
       else bouton.closest('.recherche-pied').remove();
     } catch (e) {
@@ -1843,12 +2091,16 @@
   document.addEventListener('click', e => { if (!e.target.closest('.recherche-zone')) fermerSuggestions(); });
 
   parId('resultats-recherche').addEventListener('click', e => {
-    const ligne = e.target.closest('.piste-resultat');
-    if (ligne && _rechercheActive) {
-      champRecherche.value = _rechercheActive.pistes[ligne.dataset.indice].url;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      lancer();
-      return;
+    const carte = e.target.closest('.carte-piste');
+    if (carte && _rechercheActive) {
+      const indice = Number(carte.dataset.indice);
+      if (e.target.closest('.bouton-ecouter, .carte-pochette')) { ecouterPiste(indice); return; }
+      if (e.target.closest('.bouton-analyser')) {
+        champRecherche.value = _rechercheActive.pistes[indice].url;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        lancer();
+        return;
+      }
     }
     const boutonPlus = e.target.closest('#bouton-plus');
     if (boutonPlus) afficherPlusDeTitres(boutonPlus);

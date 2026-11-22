@@ -16,6 +16,16 @@ if ($action === 'check_streams') {
     exit;
 }
 
+if ($action === 'suggestions') {
+    suggererRecherche();
+    exit;
+}
+
+if ($action === 'rechercher') {
+    rechercherPistes();
+    exit;
+}
+
 // ─── Mode 1 : scrape ─────────────────────────────────────────────────────────
 
 $url = isset($_GET['url']) ? trim($_GET['url']) : '';
@@ -389,4 +399,210 @@ function formaterDuree(int $ms): string
     $min      = intdiv($secondes, 60);
     $sec      = $secondes % 60;
     return sprintf('%d:%02d', $min, $sec);
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+// Recherche directe : suggestions pendant la frappe + résultats de titres
+// (API web de SoundCloud, avec le client_id public de la page d'accueil)
+// ═════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Nettoie le texte saisi : caractères de contrôle retirés, espaces normalisés, 100 caractères max.
+ */
+function nettoyerRequeteRecherche($valeur): string
+{
+    if (!is_string($valeur)) return '';
+    $texte = preg_replace('/[\x00-\x1F\x7F]+/', ' ', $valeur);
+    $texte = trim((string)preg_replace('/\s+/u', ' ', (string)$texte));
+    return function_exists('mb_substr') ? mb_substr($texte, 0, 100) : substr($texte, 0, 100);
+}
+
+function creerContexteSoundcloud(int $delai = 8)
+{
+    return stream_context_create([
+        'http' => [
+            'method'          => 'GET',
+            'timeout'         => $delai,
+            'follow_location' => true,
+            'max_redirects'   => 3,
+            'ignore_errors'   => true,
+            'header'          => implode("\r\n", [
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                    . 'AppleWebKit/537.36 (KHTML, like Gecko) '
+                    . 'Chrome/124.0.0.0 Safari/537.36',
+                'Accept: application/json, text/html;q=0.9, */*;q=0.8',
+                'Accept-Language: fr-FR,fr;q=0.9,en;q=0.8',
+                'Origin: https://soundcloud.com',
+                'Referer: https://soundcloud.com/',
+            ]),
+        ],
+    ]);
+}
+
+/**
+ * GET simple : retourne le code HTTP final et le corps (null si la requête a échoué).
+ */
+function appelerSoundcloud(string $url, int $delai = 8): array
+{
+    $corps    = @file_get_contents($url, false, creerContexteSoundcloud($delai));
+    $codeHttp = 0;
+    if (isset($http_response_header)) {
+        foreach ($http_response_header as $entete) {
+            if (preg_match('#HTTP/\S+\s+(\d+)#', $entete, $correspondance)) {
+                $codeHttp = (int)$correspondance[1];
+            }
+        }
+    }
+    return ['code' => $codeHttp, 'corps' => ($corps === false) ? null : $corps];
+}
+
+/**
+ * Lit le client_id web dans window.__sc_hydration (même source que le mode « scrape »)
+ * et le garde une heure dans un fichier temporaire.
+ */
+function obtenirIdClientWeb(bool $forcer = false): ?string
+{
+    $fichierCache = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'sc_scraper_client_id.txt';
+
+    if (!$forcer && is_file($fichierCache) && (time() - filemtime($fichierCache)) < 3600) {
+        $idCache = trim((string)@file_get_contents($fichierCache));
+        if ($idCache !== '') return $idCache;
+    }
+
+    foreach (['https://soundcloud.com/', 'https://soundcloud.com/discover'] as $urlPage) {
+        $reponse = appelerSoundcloud($urlPage, 15);
+        if ($reponse['code'] !== 200 || $reponse['corps'] === null) continue;
+        if (!preg_match('/window\.__sc_hydration\s*=\s*(\[.*?\]);/s', $reponse['corps'], $correspondance)) continue;
+
+        $hydratation = json_decode($correspondance[1], true);
+        if (!is_array($hydratation)) continue;
+
+        foreach ($hydratation as $entree) {
+            $idClient = $entree['data']['id'] ?? null;
+            if (($entree['hydratable'] ?? '') === 'apiClient' && is_string($idClient) && $idClient !== '') {
+                @file_put_contents($fichierCache, $idClient);
+                return $idClient;
+            }
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Appelle api-v2.soundcloud.com. Si le client_id est refusé (401/403), il est relu une fois.
+ * Aucun contournement : si SoundCloud refuse toujours, on renvoie null avec le code HTTP.
+ */
+function interrogerApiRecherche(string $chemin, array $parametres, ?int &$codeHttp = null): ?array
+{
+    for ($tentative = 0; $tentative < 2; $tentative++) {
+        $idClient = obtenirIdClientWeb($tentative === 1);
+        if ($idClient === null) {
+            $codeHttp = 0;
+            return null;
+        }
+
+        $url = 'https://api-v2.soundcloud.com' . $chemin . '?'
+             . http_build_query($parametres + ['client_id' => $idClient]);
+
+        $reponse  = appelerSoundcloud($url);
+        $codeHttp = $reponse['code'];
+
+        if ($codeHttp === 200 && $reponse['corps'] !== null) {
+            $json = json_decode($reponse['corps'], true);
+            return is_array($json) ? $json : null;
+        }
+        if ($codeHttp !== 401 && $codeHttp !== 403) return null;
+    }
+    return null;
+}
+
+/**
+ * ?action=suggestions&q=amapiano  →  { success, suggestions: ["amapiano mix", ...] }
+ */
+function suggererRecherche(): void
+{
+    $requete = nettoyerRequeteRecherche($_GET['q'] ?? '');
+
+    if (strlen($requete) < 2) {
+        echo json_encode(['success' => true, 'suggestions' => []]);
+        return;
+    }
+
+    $limite   = max(1, min(10, (int)($_GET['limit'] ?? 8)));
+    $codeHttp = 0;
+    $json     = interrogerApiRecherche('/search/queries', ['q' => $requete, 'limit' => $limite], $codeHttp);
+
+    if ($json === null) {
+        http_response_code(502);
+        echo json_encode(['success' => false, 'error' => "Suggestions indisponibles (HTTP $codeHttp)."]);
+        return;
+    }
+
+    $suggestions = [];
+    foreach (($json['collection'] ?? []) as $element) {
+        if (!is_array($element)) continue;
+        $texte = trim((string)($element['output'] ?? $element['query'] ?? ''));
+        if ($texte !== '' && !in_array($texte, $suggestions, true)) {
+            $suggestions[] = $texte;
+        }
+    }
+
+    header('Cache-Control: private, max-age=300');
+    echo json_encode(['success' => true, 'suggestions' => $suggestions], JSON_UNESCAPED_UNICODE);
+}
+
+/**
+ * ?action=rechercher&q=amapiano%20mix&limit=12&offset=0  →  { success, pistes: [...], suivant }
+ */
+function rechercherPistes(): void
+{
+    $requete = nettoyerRequeteRecherche($_GET['q'] ?? '');
+
+    if (strlen($requete) < 2) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => "Saisissez au moins 2 caractères."]);
+        return;
+    }
+
+    $limite   = max(1, min(24, (int)($_GET['limit']  ?? 12)));
+    $decalage = max(0, min(200, (int)($_GET['offset'] ?? 0)));
+    $codeHttp = 0;
+    $json     = interrogerApiRecherche('/search/tracks', [
+        'q'      => $requete,
+        'limit'  => $limite,
+        'offset' => $decalage,
+    ], $codeHttp);
+
+    if ($json === null) {
+        http_response_code(502);
+        echo json_encode([
+            'success' => false,
+            'error'   => "La recherche SoundCloud n'a pas répondu (HTTP $codeHttp). Réessayez dans un instant.",
+        ]);
+        return;
+    }
+
+    $pistes = [];
+    foreach (($json['collection'] ?? []) as $piste) {
+        if (!is_array($piste) || empty($piste['permalink_url'])) continue;
+        $pistes[] = [
+            'id'       => $piste['id'] ?? null,
+            'titre'    => $piste['title'] ?? '',
+            'artiste'  => $piste['user']['username'] ?? ($piste['publisher_metadata']['artist'] ?? ''),
+            'url'      => $piste['permalink_url'],
+            'pochette' => $piste['artwork_url'] ?? ($piste['user']['avatar_url'] ?? null),
+            'duree'    => formaterDuree((int)($piste['duration'] ?? 0)),
+            'ecoutes'  => $piste['playback_count'] ?? null,
+            'genre'    => $piste['genre'] ?? null,
+        ];
+    }
+
+    echo json_encode([
+        'success' => true,
+        'requete' => $requete,
+        'pistes'  => $pistes,
+        'suivant' => !empty($json['next_href']),
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 }

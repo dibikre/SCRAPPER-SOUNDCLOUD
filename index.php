@@ -153,11 +153,36 @@
     .bouton-copier:hover { border-color: var(--rouge); color: var(--rouge); }
     .bouton-copier.copie { background: var(--vert-pale); border-color: var(--vert); color: var(--vert); }
 
+    /* ── Recherche : suggestions et résultats ── */
+    .recherche-zone { position: relative; }
+    .suggestions { position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 20; margin: 0; padding: .5rem; list-style: none; background: #fff; border: 1px solid var(--trait); border-radius: 24px; box-shadow: 0 24px 48px -16px rgba(28, 28, 33, .28); }
+    .suggestion { display: flex; align-items: center; gap: .8rem; padding: .65rem .9rem; border-radius: 14px; cursor: pointer; }
+    .suggestion svg { flex: none; color: #9a9aa6; }
+    .suggestion.actif { background: var(--voile); }
+    .suggestion-saisie { color: var(--encre-douce); }
+    .liste-pistes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; margin: 1.25rem 0 0; padding: 0; list-style: none; }
+    .piste-resultat { display: flex; align-items: center; gap: .9rem; width: 100%; padding: .7rem; background: #fff; border: 1px solid var(--trait); border-radius: var(--rayon-moyen); color: inherit; text-align: left; cursor: pointer; transition: border-color .15s, background-color .15s; }
+    .piste-resultat:hover { border-color: var(--rouge); background: var(--voile); }
+    .piste-resultat:focus-visible { outline: 3px solid rgba(225, 29, 46, .4); outline-offset: 2px; }
+    .miniature { flex: none; width: 56px; height: 56px; object-fit: cover; background: #ececf1; border-radius: 10px; }
+    .miniature-vide { display: grid; place-items: center; color: #c3c3cc; }
+    .piste-resultat-texte { display: grid; flex: 1; min-width: 0; }
+    .piste-resultat-titre { overflow: hidden; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .piste-resultat-infos { display: flex; gap: .9rem; overflow: hidden; color: var(--encre-douce); font-size: .85rem; white-space: nowrap; }
+    .piste-resultat-artiste { overflow: hidden; text-overflow: ellipsis; }
+    .piste-resultat-action { flex: none; padding: .25rem .8rem; border: 1.5px solid var(--rouge); border-radius: 999px; color: var(--rouge); font-size: .85rem; font-weight: 700; transition: background-color .15s, color .15s; }
+    .piste-resultat:hover .piste-resultat-action { background: var(--rouge); color: #fff; }
+    .recherche-pied { display: flex; justify-content: center; margin-top: 1.5rem; }
+    .bouton-retour { justify-self: start; margin-bottom: -1.5rem; padding: .45rem 1rem .45rem .7rem; background: #fff; border: 1.5px solid var(--trait-fort); color: var(--encre); font-size: .9rem; }
+    .bouton-retour:hover { border-color: var(--encre); }
+
     @media (max-width: 860px) {
+      .liste-pistes { grid-template-columns: 1fr; }
       .piste { grid-template-columns: 1fr; }
       .pochette { max-width: 320px; }
       .rubrique { grid-template-columns: 1fr; gap: 1rem; }
     }
+    @media (max-width: 480px) { .piste-resultat-action { display: none; } }
     @media (max-width: 640px) {
       .entete-note, .recherche-icone { display: none; }
       .recherche { padding-left: .6rem; }
@@ -191,17 +216,20 @@
     <main class="hero">
       <div class="intro">
         <div class="intro-contenu">
-          <h1 class="titre-principal">Toutes les infos d’un titre SoundCloud, en un seul lien.</h1>
-          <p class="sous-titre">Collez l’adresse d’un titre ou d’un profil&nbsp;: statistiques, métadonnées éditeur et téléchargement audio.</p>
+          <h1 class="titre-principal">Cherchez un titre SoundCloud, obtenez toutes ses infos.</h1>
+          <p class="sous-titre">Tapez un titre ou un artiste, ou collez une adresse SoundCloud&nbsp;: statistiques, métadonnées éditeur et téléchargement audio.</p>
         </div>
       </div>
 
-      <form class="recherche" id="formulaire" novalidate>
-        <svg class="recherche-icone" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 11.5a3.5 3.5 0 0 0 5 0l2.5-2.5a3.5 3.5 0 0 0-5-5l-1 1M11.5 8.5a3.5 3.5 0 0 0-5 0L4 11a3.5 3.5 0 0 0 5 5l1-1"/></svg>
-        <label class="visuellement-cache" for="champ-url">Adresse SoundCloud</label>
-        <input id="champ-url" class="champ-url" type="url" placeholder="https://soundcloud.com/artiste/titre" autocomplete="off" spellcheck="false" inputmode="url" />
-        <button id="bouton-lancer" class="bouton bouton-primaire" type="submit">Analyser</button>
-      </form>
+      <div class="recherche-zone">
+        <form class="recherche" id="formulaire" novalidate role="search">
+          <svg class="recherche-icone" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="M13.5 13.5L17 17"/></svg>
+          <label class="visuellement-cache" for="champ-url">Titre, artiste ou adresse SoundCloud</label>
+          <input id="champ-url" class="champ-url" type="text" placeholder="Titre, artiste ou lien SoundCloud" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="liste-suggestions" />
+          <button id="bouton-lancer" class="bouton bouton-primaire" type="submit">Rechercher</button>
+        </form>
+        <ul class="suggestions" id="liste-suggestions" role="listbox" aria-label="Suggestions de recherche" hidden></ul>
+      </div>
 
       <div class="ondes" id="ondes" aria-hidden="true"></div>
 
@@ -212,6 +240,7 @@
         <div class="erreur" id="boite-erreur" role="alert" hidden></div>
       </div>
 
+      <section class="resultats" id="resultats-recherche" aria-label="Résultats de la recherche" hidden></section>
       <div class="resultats" id="resultats" hidden></div>
     </main>
   </div>
@@ -235,6 +264,8 @@
     copier:      '<rect x="7" y="7" width="9" height="9" rx="2"/><path d="M13 7V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h2"/>',
     alerte:      '<circle cx="10" cy="10" r="8"/><path d="M10 6v5M10 13.8v.2"/>',
     note:        '<path d="M8 15V5l8-2v10"/><circle cx="6" cy="15" r="2.2"/><circle cx="14" cy="13" r="2.2"/>',
+    loupe:       '<circle cx="9" cy="9" r="5.5"/><path d="M13.5 13.5L17 17"/>',
+    gauche:      '<path d="M12 5l-5 5 5 5"/>',
   };
   const icone = (nom, taille = 18) =>
     `<svg width="${taille}" height="${taille}" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CHEMINS_ICONES[nom]}</svg>`;
@@ -313,18 +344,29 @@
   }
 
   // ── États de l'interface ─────────────────────────────────────────────────
-  function definirLancement(enCours) {
+  const ressembleAUneUrl = t => /^https?:\/\//i.test(t) || /^((www|m|on)\.)?soundcloud\.com(\/|$)/i.test(t);
+  const libelleLancement = () => ressembleAUneUrl(parId('champ-url').value.trim()) ? 'Analyser' : 'Rechercher';
+  function majLibelleLancement() {
+    const bouton = parId('bouton-lancer');
+    if (!bouton.disabled) bouton.textContent = libelleLancement();
+  }
+  function definirLancement(enCours, mode = 'analyse') {
     const bouton = parId('bouton-lancer');
     bouton.disabled = enCours;
-    bouton.textContent = enCours ? 'Analyse…' : 'Analyser';
+    bouton.textContent = enCours ? (mode === 'recherche' ? 'Recherche…' : 'Analyse…') : libelleLancement();
   }
-  function afficherChargement(msg = 'Récupération en cours…') {
+  function masquerResultats() {
+    parId('resultats').hidden = true;
+    parId('resultats-recherche').hidden = true;
+  }
+  function afficherChargement(msg = 'Récupération en cours…', mode = 'analyse') {
+    fermerSuggestions();
     parId('zone-statut').hidden = false;
     parId('boite-chargement').hidden = false;
     parId('boite-erreur').hidden = true;
     parId('message-chargement').textContent = msg;
-    parId('resultats').hidden = true;
-    definirLancement(true);
+    masquerResultats();
+    definirLancement(true, mode);
     demarrerProgression();
   }
   function afficherErreur(msg) {
@@ -333,7 +375,7 @@
     const boite = parId('boite-erreur');
     boite.hidden = false;
     boite.innerHTML = icone('alerte', 20) + '<span>' + echapper(msg) + '</span>';
-    parId('resultats').hidden = true;
+    masquerResultats();
     definirLancement(false);
     terminerProgression(false);
   }
@@ -350,6 +392,8 @@
   async function lancer() {
     let url = parId('champ-url').value.trim();
     if (!url) { afficherErreur('Veuillez entrer une URL SoundCloud.'); return; }
+
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
 
     // Nettoyer l'URL : garder uniquement scheme://host/path
     try {
@@ -707,6 +751,9 @@
     if (d.artist)                     html += htmlArtiste(d.artist);
     if (d.track && d.track.publisher) html += htmlEditeur(d.track.publisher);
     if (!html) html = '<div class="vide">Aucune donnée structurée trouvée pour cette adresse.</div>';
+    if (_rechercheActive) {
+      html = '<button type="button" class="bouton bouton-retour" id="bouton-retour">' + icone('gauche', 16) + 'Retour aux résultats</button>' + html;
+    }
 
     zone.innerHTML = html;
     zone.hidden = false;
@@ -714,10 +761,208 @@
     initialiserTelechargement();
   }
 
+  // ── Recherche directe : liste de titres ──────────────────────────────────
+  const TAILLE_PAGE = 12;
+  let _rechercheActive = null;
+
+  function htmlLignePiste(piste, indice) {
+    const miniature = piste.pochette
+      ? `<img class="miniature" src="${echapper(piste.pochette.replace('-large', '-t200x200'))}" alt="" loading="lazy" />`
+      : `<span class="miniature miniature-vide">${icone('note', 22)}</span>`;
+    const ecoutes = piste.ecoutes != null ? `<span>${formater(piste.ecoutes)}\u00A0écoutes</span>` : '';
+    return `<li><button type="button" class="piste-resultat" data-indice="${indice}">
+      ${miniature}
+      <span class="piste-resultat-texte">
+        <span class="piste-resultat-titre">${echapper(piste.titre)}</span>
+        <span class="piste-resultat-infos"><span class="piste-resultat-artiste">${echapper(piste.artiste)}</span><span>${echapper(piste.duree)}</span>${ecoutes}</span>
+      </span>
+      <span class="piste-resultat-action">Analyser</span>
+    </button></li>`;
+  }
+
+  async function recupererPistes(requete, decalage) {
+    const reponse = await fetch('./sc.php?action=rechercher&q=' + encodeURIComponent(requete)
+      + '&limit=' + TAILLE_PAGE + '&offset=' + decalage);
+    const resultat = await reponse.json();
+    if (!resultat.success) throw new Error(resultat.error || 'Erreur inconnue du serveur');
+    return resultat;
+  }
+
+  function afficherResultatsRecherche() {
+    const zone = parId('resultats-recherche');
+    const { requete, pistes, suivant } = _rechercheActive;
+    zone.innerHTML = pistes.length
+      ? `<div>
+           <h2 class="rubrique-titre">Résultats pour «\u00A0${echapper(requete)}\u00A0»</h2>
+           <ul class="liste-pistes" id="liste-pistes">${pistes.map(htmlLignePiste).join('')}</ul>
+           ${suivant ? '<div class="recherche-pied"><button type="button" class="bouton bouton-secondaire" id="bouton-plus">Afficher plus de titres</button></div>' : ''}
+         </div>`
+      : `<div class="vide">Aucun titre trouvé pour «\u00A0${echapper(requete)}\u00A0». Essayez une autre orthographe.</div>`;
+    zone.hidden = false;
+    parId('page').classList.add('a-des-resultats');
+  }
+
+  async function rechercherTitres(requete) {
+    afficherChargement('Recherche en cours…', 'recherche');
+    try {
+      const resultat = await recupererPistes(requete, 0);
+      _rechercheActive = { requete, decalage: TAILLE_PAGE, pistes: resultat.pistes, suivant: resultat.suivant };
+      terminerProgression(true);
+      masquerStatut();
+      definirLancement(false);
+      afficherResultatsRecherche();
+    } catch (e) {
+      afficherErreur('Erreur : ' + e.message);
+    }
+  }
+
+  async function afficherPlusDeTitres(bouton) {
+    bouton.disabled = true;
+    bouton.textContent = 'Chargement…';
+    try {
+      const resultat = await recupererPistes(_rechercheActive.requete, _rechercheActive.decalage);
+      const depart = _rechercheActive.pistes.length;
+      _rechercheActive.pistes.push(...resultat.pistes);
+      _rechercheActive.decalage += TAILLE_PAGE;
+      _rechercheActive.suivant = resultat.suivant;
+      parId('liste-pistes').insertAdjacentHTML('beforeend', resultat.pistes.map((p, i) => htmlLignePiste(p, depart + i)).join(''));
+      if (resultat.suivant) { bouton.disabled = false; bouton.textContent = 'Afficher plus de titres'; }
+      else bouton.closest('.recherche-pied').remove();
+    } catch (e) {
+      bouton.disabled = false;
+      bouton.textContent = 'Réessayer';
+    }
+  }
+
+  // ── Suggestions pendant la frappe ────────────────────────────────────────
+  const champRecherche     = parId('champ-url');
+  const listeSuggestions   = parId('liste-suggestions');
+  const cacheSuggestions   = new Map();
+  let suggestionsCourantes = [];
+  let indiceSuggestion     = -1;
+  let minuteurSuggestions  = null;
+  let controleurSuggestions = null;
+
+  function fermerSuggestions() {
+    clearTimeout(minuteurSuggestions);
+    if (controleurSuggestions) controleurSuggestions.abort();
+    suggestionsCourantes = [];
+    indiceSuggestion = -1;
+    listeSuggestions.hidden = true;
+    listeSuggestions.innerHTML = '';
+    champRecherche.setAttribute('aria-expanded', 'false');
+    champRecherche.removeAttribute('aria-activedescendant');
+  }
+
+  function activerSuggestion(indice) {
+    indiceSuggestion = indice;
+    listeSuggestions.querySelectorAll('.suggestion').forEach((element, i) => {
+      element.classList.toggle('actif', i === indice);
+      element.setAttribute('aria-selected', i === indice);
+    });
+    if (indice >= 0) champRecherche.setAttribute('aria-activedescendant', 'suggestion-' + indice);
+    else champRecherche.removeAttribute('aria-activedescendant');
+  }
+
+  function afficherSuggestions(liste, saisie) {
+    if (!liste.length) { fermerSuggestions(); return; }
+    suggestionsCourantes = liste;
+    indiceSuggestion = -1;
+    const debut = saisie.toLowerCase();
+    listeSuggestions.innerHTML = liste.map((texte, i) => {
+      const corps = texte.toLowerCase().startsWith(debut)
+        ? `<span class="suggestion-saisie">${echapper(texte.slice(0, saisie.length))}</span><strong>${echapper(texte.slice(saisie.length))}</strong>`
+        : `<strong>${echapper(texte)}</strong>`;
+      return `<li class="suggestion" id="suggestion-${i}" role="option" aria-selected="false" data-indice="${i}">${icone('loupe')}<span>${corps}</span></li>`;
+    }).join('');
+    listeSuggestions.hidden = false;
+    champRecherche.setAttribute('aria-expanded', 'true');
+  }
+
+  async function chargerSuggestions(saisie) {
+    const cle = saisie.toLowerCase();
+    if (cacheSuggestions.has(cle)) { afficherSuggestions(cacheSuggestions.get(cle), saisie); return; }
+
+    controleurSuggestions = new AbortController();
+    try {
+      const reponse = await fetch('./sc.php?action=suggestions&q=' + encodeURIComponent(saisie), { signal: controleurSuggestions.signal });
+      const resultat = await reponse.json();
+      if (!resultat.success) return;
+      cacheSuggestions.set(cle, resultat.suggestions);
+      if (champRecherche.value.trim() === saisie) afficherSuggestions(resultat.suggestions, saisie);
+    } catch (e) { /* suggestions facultatives : on ignore les erreurs et les requêtes annulées */ }
+  }
+
+  function choisirSuggestion(texte) {
+    champRecherche.value = texte;
+    fermerSuggestions();
+    rechercherTitres(texte);
+  }
+
+  function soumettre() {
+    const texte = champRecherche.value.trim();
+    if (!texte) { afficherErreur('Saisissez un titre, un artiste ou une adresse SoundCloud.'); return; }
+    if (ressembleAUneUrl(texte)) { _rechercheActive = null; lancer(); }
+    else rechercherTitres(texte);
+  }
+
   // ── Événements ────────────────────────────────────────────────────────────
-  parId('formulaire').addEventListener('submit', e => { e.preventDefault(); lancer(); });
+  parId('formulaire').addEventListener('submit', e => { e.preventDefault(); soumettre(); });
+
+  champRecherche.addEventListener('input', () => {
+    clearTimeout(minuteurSuggestions);
+    if (controleurSuggestions) controleurSuggestions.abort();
+    majLibelleLancement();
+    const saisie = champRecherche.value.trim();
+    if (saisie.length < 2 || ressembleAUneUrl(saisie)) { fermerSuggestions(); return; }
+    minuteurSuggestions = setTimeout(() => chargerSuggestions(saisie), 200);
+  });
+
+  champRecherche.addEventListener('focus', () => {
+    const saisie = champRecherche.value.trim();
+    const memoire = cacheSuggestions.get(saisie.toLowerCase());
+    if (memoire && !ressembleAUneUrl(saisie) && listeSuggestions.hidden) afficherSuggestions(memoire, saisie);
+  });
+
+  champRecherche.addEventListener('keydown', e => {
+    const nombre = suggestionsCourantes.length;
+    const ouvert = !listeSuggestions.hidden && nombre > 0;
+    if (e.key === 'ArrowDown' && ouvert)      { e.preventDefault(); activerSuggestion((indiceSuggestion + 1) % nombre); }
+    else if (e.key === 'ArrowUp' && ouvert)   { e.preventDefault(); activerSuggestion((indiceSuggestion - 1 + nombre) % nombre); }
+    else if (e.key === 'Escape')              { fermerSuggestions(); }
+    else if (e.key === 'Enter' && ouvert && indiceSuggestion >= 0) {
+      e.preventDefault();
+      choisirSuggestion(suggestionsCourantes[indiceSuggestion]);
+    }
+  });
+
+  listeSuggestions.addEventListener('mousedown', e => e.preventDefault());
+  listeSuggestions.addEventListener('click', e => {
+    const element = e.target.closest('.suggestion');
+    if (element) choisirSuggestion(suggestionsCourantes[element.dataset.indice]);
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('.recherche-zone')) fermerSuggestions(); });
+
+  parId('resultats-recherche').addEventListener('click', e => {
+    const ligne = e.target.closest('.piste-resultat');
+    if (ligne && _rechercheActive) {
+      champRecherche.value = _rechercheActive.pistes[ligne.dataset.indice].url;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      lancer();
+      return;
+    }
+    const boutonPlus = e.target.closest('#bouton-plus');
+    if (boutonPlus) afficherPlusDeTitres(boutonPlus);
+  });
 
   parId('resultats').addEventListener('click', async e => {
+    if (e.target.closest('#bouton-retour') && _rechercheActive) {
+      parId('resultats').hidden = true;
+      parId('resultats-recherche').hidden = false;
+      champRecherche.value = _rechercheActive.requete;
+      majLibelleLancement();
+      return;
+    }
     const bouton = e.target.closest('.bouton-copier');
     if (!bouton) return;
     try { await navigator.clipboard.writeText(bouton.dataset.copie || ''); } catch (_) { return; }
